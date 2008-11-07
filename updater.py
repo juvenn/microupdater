@@ -27,11 +27,9 @@ from helper import timetuple_dt
 FETCH_TD = timedelta(0, 300, 0) 
 # The number of character truncated in entry.summary
 CONTENT_TRUNC = 200 
-# Entry clear timedelta. Outdated entries will be cleared every CLEAR_TD cycle.
-CLEAR_TD = timedelta(30)
 
 def sync():
-    for chnl in Channel.all():
+    for chnl in Channel.all().filter("is_approved =", True):
 	# Check if chnl was urlfetched in last FETCH_TD.seconds.
 	tmnow = datetime.utcnow()
 	if tmnow-chnl.last_fetch >= FETCH_TD:
@@ -48,9 +46,6 @@ def sync():
 
 		# Update db if updates available.
 		if updated_dt > chnl.updated:
-		    # TODO: Clear outdated entries in the updated channel.
-		    Entry.clear(chnl, CLEAR_TD)
-
 		    # Put updated entries into db. 
 		    updated_entries = [n for n in pa.entries if n.updated_parsed > chnl.updated.utctimetuple()]
 		    for ntr in updated_entries:
@@ -71,9 +66,9 @@ def sync():
 		(chnl.etag, chnl.last_modified) = (re.headers['ETag'], 
 						re.headers['Last-Modified'])
 
-	    # Delete the permanetly removed channel.
+	    # For permanetly removed channel, set not approved to stop updates 
 	    # TODO: notify admin for channel update.
-	    else if re.status_code == 410:
-		chnl.delete()
+	    elif re.status_code == 410:
+		chnl.is_approved = False
 
 	chnl.last_fetch = tmnow
