@@ -14,48 +14,47 @@ import feedparser
 
 class Channel(db.Model):
     # About team and products. 
-    producer = db.StringProperty()
-    description = db.TextProperty(default=None)
+    producer = db.StringProperty(required=True)
+    description = db.TextProperty()
 
     # Feed and its update status.
     title = db.StringProperty()
     link = db.LinkProperty(required=True)
     # The last update time.
-    updated = db.DateTimeProperty(auto_now=True)
+    updated = db.DateTimeProperty()
     # The last fetch time.
     last_fetch = db.DateTimeProperty()
     etag = db.StringProperty()
     last_modified = db.StringProperty()
     # Only approved channel get updates.
-    is_approved = db.BooleanProperty(default=True)
+    is_approved = db.BooleanProperty(default=False)
 
     def initialize(self):
-      # Validate url and check if it's already in db.
-      if not Channel.all().filter("link =", self.url):
-	re = urlfetch.fetch(self.link)
-	if re.status_code == 200:
-	  pa = feedparser.parse(re.content)
-	  if not self.producer:
-	    self.producer = pa.feed.publisher
-	  self.title = pa.feed.title
-	  self.updated = tmnow = datetime.utcnow()
-	  self.last_fetch = tmnow
-	  if re.headers.has_key["ETag"]: self.etag = re.headers["ETag"]
-	  if re.headers.has_key["Last-Modified"]: 
-	    self.last_modified = re.headers["Last-Modified"]
+      # Check if it's already in db.
+      #if not Channel.all().filter("link =", self.link):
+      re = urlfetch.fetch(url=self.link)
+      if re.status_code == 200:
+	pa = feedparser.parse(re.content)
+	if pa.feed.has_key("publisher") and not self.producer:
+	  self.producer = pa.feed.publisher
+	self.title = pa.feed.title
+	self.updated = self.last_fetch = datetime(2008, 11, 01)
+	self.etag = re.headers.get("etag")
+	self.last_modified = re.headers.get("last-modified")
+      self.put()
 
 class Entry(db.Model):
     author = db.StringProperty()
-    title = db.StringProperty()
-    link = db.LinkProperty()
-    # Truncated content of the entry, instead of original entry summary.
+    title = db.StringProperty(required=True)
+    link = db.LinkProperty(required=True)
+    # Content of the entry.
     summary = db.TextProperty()
     # The last updated time of the entry.
-    updated = db.DateTimeProperty()
-    channel = db.ReferenceProperty(Channel)
+    updated = db.DateTimeProperty(required=True)
+    channel = db.ReferenceProperty(reference_class=Channel, required=True)
 
     # Clear outdated entries.
-    def clear(chnl, clear_td):
+    def clear(chnl, clear_td=timedelta(30, 0, 0)):
 	outdated_dt = datetime.utcnow() - clear_td
 	for ent in chnl.entry_set:
 	    if ent.updated <= outdated_dt:

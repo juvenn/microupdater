@@ -18,12 +18,12 @@ import updater
 class MainPage(webapp.RequestHandler):
   def get(self):
     entries_query = Entry.all().order('-updated')
-    entries = entries_query.fetch(50)
+    entries = entries_query.fetch(1000)
     items = [e for e in entries ]
 
     template_values = { 'items': items }
 
-    path = os.path.join(os.path.dirname(__file__), 'index.html')
+    path = os.path.join(os.path.dirname(__file__), 'view/index.html')
     self.response.out.write(template.render(path, template_values))
 
 # Route incoming requests to MainPage.
@@ -33,8 +33,8 @@ application = webapp.WSGIApplication(
 
 def main():
   run_wsgi_app(application)
-  # Update db in background.
-  updater.sync()
 
 if __name__ == "__main__":
   main()
+  # Update db in background.
+ # updater.sync()

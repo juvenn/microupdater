@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "">
+<html xmlns="" xml:lang="en" lang="en">
+<head>
+  <link rel="" />
+  <title>Updater - What's New</title>
+</head>
+<body>
+
+  <div id="head">
+    <div id="navbar">
+      <h1 class="mu-title"><a href="#">Updater</a><sup>0.1</sup></h1>
+      <h2 class="mu-subtitle">What's New</h2>
+      <ul id="menu-nav">
+	<li class="menu-item"><a href="#">NEW</a></li>
+	<li class="menu-item"><a href="#">Last 7 Days</a></li>
+	<li class="menu-item"><a href="#">DAY LIST</a></li>
+      </ul>
+    </div>
+  </div>
+  <!-- End div#head -->
+
+  <div id="container">
+
+    <div id="side">
+      <div id="sidenote" class="side-section"></div>
+      <div id="featured" class="side-section"></div>
+      <div id="ads" class="side-section"></div>
+    </div>
+    <!-- End div#side -->
+
+    <div id="main">
+      {% block entry-list %}{% endblock entry-list %}
+    </div>
+    <!-- End div#main -->
+
+  </div>
+  <!-- End div#container -->
+
+  <div id="foot">
+  </div>
+  <!-- End div#foot -->
+
+</body>
+</html>

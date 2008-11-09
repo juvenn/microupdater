@@ -8,7 +8,7 @@
 	  {% for it in items %}
 	    <li class="entry">
 	    <div class="entry-head">
-	      <span class="entry-dt">{{ it.updated|time:"h:i A, D" }}</span>
+	      <span class="entry-dt">{{ it.updated|time:"h:i A, " }}</span>
 	      <cite class="channel-info">
 		{{ it.channel.producer }} / <a href="{{ it.channel.link }}">{{ it.channel.title }}</a>
 	      </cite>
@@ -17,7 +17,7 @@
 	      <h4 class="entry-title">
 		<a href="{{ it.link }}">{{ it.title }}</a>
 	      </h4>
-	      <p class="entry-summary">{{ it.summary }}</p>
+	      <p class="entry-summary">{{ it.summary|truncatewords:200 }}</p>
 	    </div>
 	    <div class="entry-foot"></div>
 	    </li>
