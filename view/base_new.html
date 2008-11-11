@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block main %}
+<ul id="entry-list" class="nomarker">
+  {% for it in items %}
+  <li class="entry">
+  <div class="supline">
+    <h5 class="entry-line">
+      <span class="entry-datetime">{{ it.updated|time:"h:i A" }}</span>
+      <span class="producer"> / {{ it.channel.producer }}</span>
+    </h5>
+  </div>
+  <h4 class="entry-title">
+    <a href="{{ it.channel.link }}">{{ it.author }}</a> /
+    <a href="{{ it.link }}">{{ it.title }}</a>
+  </h4>
+  <p class="entry-summary">{{ it.summary|truncatewords:30 }}</p>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock main %}

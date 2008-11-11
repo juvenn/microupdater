@@ -1,19 +1,20 @@
 <!DOCTYPE html PUBLIC "">
 <html xmlns="" xml:lang="en" lang="en">
 <head>
-  <link rel="" />
+  <meta http-euiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" href="view/layout.css" type="text/css" />
   <title>Updater - What's New</title>
 </head>
 <body>
 
   <div id="head">
+    <h1 class="mu-title"><a href="#">updater</a><sup>0.1</sup> 
+    </h1>
     <div id="navbar">
-      <h1 class="mu-title"><a href="#">Updater</a><sup>0.1</sup></h1>
-      <h2 class="mu-subtitle">What's New</h2>
-      <ul id="menu-nav">
-	<li class="menu-item"><a href="#">NEW</a></li>
-	<li class="menu-item"><a href="#">Last 7 Days</a></li>
-	<li class="menu-item"><a href="#">DAY LIST</a></li>
+      <ul id="menu-nav" class="nomarker">
+	<li class="menu-item">What's New</li>
+	<li class="menu-item"></li>
+	<li class="menu-item"></li>
       </ul>
     </div>
   </div>
@@ -22,23 +23,42 @@
   <div id="container">
 
     <div id="side">
-      <div id="sidenote" class="side-section"></div>
-      <div id="featured" class="side-section"></div>
+      {% block side %}
+      <div id="welcome" class="side-section">
+	<div class="secline"><h3 class="side-sectitle">Welcome</h3></div>
+	<p><img src="/view/images/square_0.1.32.png" />Thanks for your visiting, UPDATER is still in an early prototype stage, and will be improved later. Remember checking it some day later.</p>
+      </div>
+      <div id="sidenote" class="side-section">
+	<div class="secline"><h3 class="side-sectitle">About</h3></div>
+	<p>What's NEW? <a href="http://www.memiary.com">Memiary</a> launched, <a href="http://friendfeed.com">FriendFeed</a> updated(<a href="http://blog.friendfeed.com">IM integration</a>), or maybe <a href="http://www.google.com/chrome">Google Chrome</a> for Linux will going out. UPDATER aggregates these NEWs from official product blogs or update sources. Items are ordered in a timeline fashion, instead of some rank, making it simple to discover promising yet under-the-radar products. </p>
+      </div>
+      <div id="todo" class="side-section">
+	<div class="secline"><h3 class="side-sectitle">Todo</h3></div>
+	<ul>
+	  <li>Improving design, and keeping it simple</li>
+	  <li>Faster and more responsive, and real-time updates</li>
+	  <li>Multiple categories: Web, Desktop, Mobile</li>
+	  <li>Multimedia preview</li>
+	  <li>Product updates history</li>
+	  <li>For developers: add your product blog to our DB</li>
+	  <li>Sincerely, some ads will be displayed. But we will take efforts to minimize your view cost.</li>
+	</ul>
+      </div>
       <div id="ads" class="side-section"></div>
+      {% endblock side %}
     </div>
     <!-- End div#side -->
 
     <div id="main">
-      {% block entry-list %}{% endblock entry-list %}
+      {% block main %}{% endblock main %}
     </div>
     <!-- End div#main -->
 
   </div>
   <!-- End div#container -->
 
-  <div id="foot">
+  <div id="foot"><p>Copyright (c) 2008. Thanks for your visiting, UPDATER is still in an early prototype stage, and will be improved later. Remember checking it some day later.</p>
   </div>
   <!-- End div#foot -->
-
 </body>
 </html>

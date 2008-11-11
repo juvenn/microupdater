@@ -4,5 +4,9 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /.*
+- url: /view
+  static_dir: view
+
+- url: /
   script: main.py
+  

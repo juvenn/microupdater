@@ -1,2 +1,158 @@
+/**
+ * Microupdater Design
+ */
+
 body {
+  font-family: Georgia, sans-serif;
+  font-size: 100%;
+  color: #333;
+  width: 960px;
+  background-color: #fff;
+  margin: 5px auto;
+}
+
+a:active {
+  color: #007000;
+}
+a:hover {
+  font-style: italic;
+}
+
+ul.nomarker {
+  list-style-type: none;
+}
+
+/*------------ #head ------------*/
+
+div#head {
+}
+
+h1.mu-title {
+  font-size: 3em;
+  font-family: sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+}
+h1.mu-title sup {
+  font-size: 0.4em;
+  color: #ccc;
+  vertical-align: top;
+}
+.mu-subtitle {
+  font-size: 0.8em;
+}
+
+/*--reset anchor behavior in head --*/
+#head a:link {
+  text-decoration: none;
+}
+#head a:visited {
+  color: #36e;
+  text-decoration: none;
+}
+
+/*----#navbar---*/
+div#navbar {
+  overflow: auto;
+  border-top: solid #36e 1px;
+  background: #e5ecf9;
+}
+
+ul#menu-nav {
+  margin-top: 0;
+}
+
+ul#menu-nav a {
+}
+
+li.menu-item {
+  font-size: 1.2em;
+  color: #007000;
+  font-weight: bold;
+  float: left;
+  padding: 0.2em 1.6em;
+}
+
+li.menu-item:hover {
+  color: #fff;
+  background-color: #36e;
+}
+
+li.menu-item:hover a:hover,
+li.menu-item:hover a:link,
+li.menu-item:hover a:visited,
+li.menu-item:hover a:active {
+  color: #fff;
+  text-decoration: none;
+}
+
+/*--------------#container-------------*/
+
+div#container {
+  clear: both;
+  overflow: auto;
+}
+
+div.secline {
+  background-image: url(/view/images/blue-seperator.gif);
+  background-repeat: repeat-x;
+}
+
+/*-------#side--------*/
+
+div#side {
+  float: right;
+  width: 350px;
+}
+
+div.side-section {
+  margin: 1em;
+}
+h3.side-sectitle {
+  display: inline;
+  font-size: 1em;
+  text-transform: uppercase;
+  background: #fff;
+}
+
+/*---------#main--------*/
+
+div#main {
+  float: left;
+  width: 600px;
+  border-right: solid #e5ecf9 4px;
+}
+
+div.supline {
+  background-image: url(/view/images/grey-seperator.gif);
+  background-repeat: repeat-x;
+}
+
+h5.entry-line {
+  display: inline;
+  font-size: 0.8em;
+  background: #fff;
+}
+
+h4.entry-title {
+  font-size: 0.8em;
+}
+.entry-datetime {
+  color: #007000;
+  margin-left: -3em;
+}
+.producer {
+  color: #666;
+}
+
+ul#entry-list {
+  margin-right: 1em;
+}
+/*---------------#foot----------------*/
+
+div#foot {
+  clear: both;
+  padding: 0.4em 2em;
+  border-bottom: solid #36e 2px;
+  background: #e5ecf9;
 }

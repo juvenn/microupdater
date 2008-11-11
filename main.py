@@ -23,7 +23,7 @@ class MainPage(webapp.RequestHandler):
 
     template_values = { 'items': items }
 
-    path = os.path.join(os.path.dirname(__file__), 'view/index.html')
+    path = os.path.join(os.path.dirname(__file__), 'view/base_new.html')
     self.response.out.write(template.render(path, template_values))
 
 # Route incoming requests to MainPage.
