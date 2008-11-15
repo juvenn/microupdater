@@ -94,7 +94,7 @@ div#container {
 }
 
 div.secline {
-  background-image: url(/view/images/blue-seperator.gif);
+  background-image: url(/asset/images/blue-seperator.gif);
   background-repeat: repeat-x;
 }
 
@@ -124,7 +124,7 @@ div#main {
 }
 
 div.supline {
-  background-image: url(/view/images/grey-seperator.gif);
+  background-image: url(/asset/images/grey-seperator.gif);
   background-repeat: repeat-x;
 }
 

@@ -1,0 +1,7 @@
+producer,url,location,is_web,is_desktop,is_mobile
+"Delicious","http://blog.delicious.com/blog/feed/",""
+"Dropbox","http://blog.getdropbox.com/index.php?feed=atom",""
+"Live Mesh","http://blogs.msdn.com/livemesh/atom.xml",""
+"Macromates","http://blog.macromates.com/feed/","Copenhagen, Denmark"
+"Mozilla Labs","http://labs.mozilla.com/feed/",""
+"Posterous","http://blog.posterous.com/rss.xml",""

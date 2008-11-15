@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 #
 # Copyright (c) 2008 Juvenn Woo.
 # http://twitter.com/juvenn.

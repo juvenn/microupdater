@@ -11,6 +11,7 @@ Traverse all channels, check remote server for any updates, fetch from the chann
 """
 
 # Import from standard Python library.
+import logging
 from datetime import datetime, timedelta
 
 # Import from google appengine.
@@ -20,13 +21,12 @@ from google.appengine.api import urlfetch
 # Visit http://feedparser.org
 import feedparser
 # Import from user-defined modules.
-from dbmodel import Channel, Entry
+from mudel import Channel, Entry
 from helper import timetuple_dt
 
-# URLFetch timedelta(days, fracseconds, fracmicroseconds). Intended urlfetch.fetch() will be ignored within a FETCH_TD cycle.
+# URLFetch timedelta(days, fracseconds, fracmicroseconds). 
+# Intended urlfetch.fetch() will be ignored within a FETCH_TD cycle.
 FETCH_TD = timedelta(0, 300, 0) 
-# The number of character truncated in entry.summary
-CONTENT_TRUNC = 200 
 
 def sync():
     for chnl in Channel.all().filter("is_approved =", True):
@@ -38,44 +38,71 @@ def sync():
 	    if chnl.etag: h["If-None-Match"] = chnl.etag
 	    if chnl.last_modified: 
 	        h["If-Modified-Since"] = chnl.last_modified
-	    re = urlfetch.fetch(url=chnl.link, headers=h)
-			
-	    # Parse the fetched content.
-	    if re.status_code == 200:
+
+	    try:
+	      re = urlfetch.fetch(url=chnl.url, headers=h)
+	      chnl.last_fetch = tmnow
+	    except InvalidURLError:
+	      logging.error("InvalidURLError: %s is invalid. " \
+		  "Only http or https allowed.", 
+		  chnl.url)
+	    except DownloadError:
+	      logging.error("DownloadError: " \
+		  "attempt to fetch from %s failed.", \
+		  chnl.url)
+	    except ResponseTooLargeError:
+	      logging.error("ResponseTooLargeError: %s", chnl.url)
+
+	    else:
+	      if re.status_code == 200:
 		pa = feedparser.parse(re.content)
 
-		# Turn the parsed timetuple into datetime type.
-		updated_dt = timetuple_dt(pa.entries[0].updated_parsed)
+                if pa.feed:
+		  # Turn the parsed timetuple into datetime type.
+		  try:
+		    update_dt = timetuple_dt(pa.feed.updated_parsed)
+		  except:
+		    # Get the chnl's last build date from 
+		    # latest of entries's build date list.
+		    # Here assumed entry has updated_parsed attribute,
+		    # attention should be paid.
+		    dts = [e.updated_parsed for e in pa.entries]
+		    dts.sort()
+		    dts.reverse()
+		    update_dt = timetuple_dt(dts[0])
 
-		# Update db if updates available.
-		if updated_dt > chnl.updated:
-		    # Put updated entries into db. 
-		    updated_entries = [e for e in pa.entries if e.updated_parsed > chnl.updated.utctimetuple()]
-		    for e in updated_entries:
-			e_updated_dt = timetuple_dt(e.updated_parsed)
-			ent = Entry(title=e.title,
-				link=e.link,
-				updated=e_updated_dt,
-				channel=chnl.key())
-			# Feed may have no author attribute (e.g.twitter).
-			ent.author = e.get("author")
+		  if update_dt > chnl.updated:
+		    updated_tuple = chnl.updated.utctimetuple()
+		    update_entries = [e for e in pa.entries \
+			if e.updated_parsed > updated_tuple]
+		    for e in update_entries:
+			e_update_dt = timetuple_dt(e.updated_parsed)
+			ent = Entry(author = e.get("author"),
+			    title=e.title,
+			    link=e.link,
+			    updated=e_update_dt,
+			    on_date=e_update_dt.date(),
+			    channel=chnl.key())
 			# Update entry summary.
 			if e.has_key("content"): ent.summary = e.content
 			elif e.has_key("summary"): ent.summary = e.summary
+		        else: ent.summary = e.title
 
 			ent.put()
 
 		    # Update the chnl.updated datetime.
-		    chnl.updated = updated_dt
+		    chnl.updated = update_dt
 
-		# Update etag and modified of the channel.
-		chnl.etag = re.headers.get("etag")
-		chnl.last_modified = re.headers.get("last-modified")
+		  # Update etag and modified of the channel.
+		  chnl.etag = re.headers.get("etag")
+		  chnl.last_modified = re.headers.get("last-modified")
 
-	    # For permanetly removed channel, stop to update. 
-	    # TODO: notify admin for channel update.
-	    elif re.status_code == 410:
+	      # For permanetly removed channel, stop to update. 
+	      elif re.status_code == 410:
 		chnl.is_approved = False
+		logging.warning("http status 410: " \
+		    "content is permanetly removed from %s.\n" \
+		    "is_approved = False.\n",
+		    chnl.url)
 
-	chnl.last_fetch = tmnow
-	chnl.put()
+	      chnl.put() 

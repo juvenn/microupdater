@@ -4,9 +4,13 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /view
-  static_dir: view
+- url: /asset
+  static_dir: asset
 
-- url: /
+# "/", "/web", "/web/", "/web/other"
+# (though the "other" part will be ignored by handlers),
+# and alike will be routined to main.
+# But "/webb" and alike will not.
+- url: /($|web|desktop|mobile)($|/)
   script: main.py
   

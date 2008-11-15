@@ -12,23 +12,32 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from dbmodel import Channel, Entry
+from mudel import Channel, Entry
 import updater
 
 class MainPage(webapp.RequestHandler):
-  def get(self):
-    entries_query = Entry.all().order('-updated')
-    entries = entries_query.fetch(1000)
-    items = [e for e in entries ]
+  def get(self, category, no):
+    if category == 'web':
+      entries = Entry.all().filter("channel.is_web =", True)\
+	  .order('-updated').fetch(50)
+    elif category == 'desktop':
+      entries = Entry.all().filter('channel.is_desktop =', True)\
+	  .order('-updated').fetch(50)
+    elif category == 'mobile':
+      entries = Entry.all().filter('channel.is_mobile =', True)\
+	  .order('-updated').fetch(50)
+    else:
+      # Default for all.
+      entries = Entry.all().order('-updated').fetch(50)
 
-    template_values = { 'items': items }
+    template_values = { 'entries': entries }
 
-    path = os.path.join(os.path.dirname(__file__), 'view/base_new.html')
+    path = os.path.join(os.path.dirname(__file__), 'base_new.html')
     self.response.out.write(template.render(path, template_values))
 
-# Route incoming requests to MainPage.
+# Note that two additional regex group routed to get().
 application = webapp.WSGIApplication(
-    [('/', MainPage)],
+    [('/($|web|desktop|mobile)($|/)', MainPage)],
     debug=True)
 
 def main():
