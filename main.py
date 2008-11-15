@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 #
 # Copyright (c) 2008 Juvenn Woo.
 # http://twitter.com/juvenn
@@ -12,30 +12,28 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from mudel import Channel, Entry
+from mudel import Channel, Entry, Featured
 import updater
 
 class MainPage(webapp.RequestHandler):
   def get(self, category, no):
     if category == 'web':
-      entries = Entry.all().filter("channel.is_web =", True)\
-	  .order('-updated').fetch(50)
+      entries_query = Entry.all().filter('tags =', 'web')
     elif category == 'desktop':
-      entries = Entry.all().filter('channel.is_desktop =', True)\
-	  .order('-updated').fetch(50)
+      entries_query = Entry.all().filter('tags =', 'desktop')
     elif category == 'mobile':
-      entries = Entry.all().filter('channel.is_mobile =', True)\
-	  .order('-updated').fetch(50)
+      entries_query = Entry.all().filter('tags  =', 'mobile')
     else:
       # Default for all.
-      entries = Entry.all().order('-updated').fetch(50)
+      entries_query = Entry.all()
 
-    template_values = { 'entries': entries }
+    template_values = { 
+	'entries': entries_query.order('-updated').fetch(50) }
 
     path = os.path.join(os.path.dirname(__file__), 'base_new.html')
     self.response.out.write(template.render(path, template_values))
 
-# Note that two additional regex group routed to get().
+# Note that one additional regex group ($|/) routed to get().
 application = webapp.WSGIApplication(
     [('/($|web|desktop|mobile)($|/)', MainPage)],
     debug=True)
@@ -45,5 +43,5 @@ def main():
 
 if __name__ == "__main__":
   main()
-  # Update db in background.
- # updater.sync()
+  # Update db in background?
+  updater.sync()

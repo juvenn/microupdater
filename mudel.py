@@ -8,34 +8,31 @@
 
 from datetime import datetime, timedelta
 import logging
+
 from google.appengine.ext import db
 from google.appengine.api import urlfetch
 
 import feedparser
 
 class Channel(db.Model):
-    # About team. 
-    producer = db.StringProperty()
-    location = db.PostalAddressProperty()
+    # About team and products. 
+    producer = db.StringProperty(verbose_name='Producer')
+    products = db.StringListProperty(verbose_name='Product(s)')
+    location = db.PostalAddressProperty(verbose_name='Location')
 
-    url = db.LinkProperty(required=True)
-    img_src = db.LinkProperty()
-    # The last update time.
+    # About channel.
+    url = db.LinkProperty(verbose_name='Feed URL',
+	required=True)
+    tags = db.ListProperty(item_type=db.Category, 
+	verbose_name='Tags')
+    img_src = db.LinkProperty(verbose_name='Logo')
+    
+    # Channel update status.
+    updatable = db.BooleanProperty()
     updated = db.DateTimeProperty()
-    # The last fetch time.
     last_fetch = db.DateTimeProperty()
     etag = db.StringProperty()
     last_modified = db.StringProperty()
-
-    # Only approved channel get updates.
-    is_approved = db.BooleanProperty()
-    # Featured or not
-    is_featured =db.BooleanProperty()
-
-    # Categories: web, desktop, mobile
-    is_web = db.BooleanProperty()
-    is_desktop = db.BooleanProperty()
-    is_mobile = db.BooleanProperty()
 
     def initialize(self):
       """initialize()
@@ -64,31 +61,43 @@ class Channel(db.Model):
             self.put()
 	    return self
 
+    
 class Entry(db.Model):
-    title = db.StringProperty()
-    link = db.LinkProperty()
-    # Content of the entry.
+    title = db.StringProperty(required=True)
+    link = db.LinkProperty(required=True)
     summary = db.TextProperty()
     img_src = db.LinkProperty()
-
-    # The last updated time of the entry.
     updated = db.DateTimeProperty()
-    # on_date = updated.date(), for template regroup.
-    # e.g. 
-    # {% regroup entries by on_date as group %}
-    on_date = db.DateTimeProperty()
 
-    channel = db.ReferenceProperty(reference_class=Channel)
+    channel = db.ReferenceProperty(reference_class=Channel,
+	collection_name='entries',
+	required=True)
 
     # Clear outdated entries, default saving for 30 days.
-    def clear(clear_td=timedelta(30, 0, 0)):
+    def clear(td=timedelta(30, 0, 0)):
         """clear()
 
 	Clear outdated entries, i.e. default 30 days since updated.
 	"""
-	outdated_dt = datetime.utcnow() - clear_td
+	outdated_dt = datetime.utcnow() - td
 	for ent in Entry.all().order('updated'):
 	    if ent.updated <= outdated_dt:
 		ent.delete()
         logging.info("Entries updated before %s were cleared.",
 	    outdated_dt.strftime("%c"))
+
+
+class Featured(db.Model):
+  """Featured status
+
+  For channels featured on top or side. Includes start and end of being
+  featured, exclusive featured on top or not, latest updated entry of 
+  the channel etc.
+  """
+  channel = db.ReferenceProperty(reference_class=Channel, required=True)
+  latest_entry = db.ReferenceProperty(reference_class=Entry)
+  exclusive = db.BooleanProperty()
+
+  # Featured time.
+  start_dt = db.DateTimeProperty()
+  end_dt = db.DateTimeProperty()

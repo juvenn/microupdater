@@ -14,3 +14,7 @@ handlers:
 - url: /($|web|desktop|mobile)($|/)
   script: main.py
   
+# Bulk data load.
+- url: /admin/import
+  script: muloader.py
+  login: admin

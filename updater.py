@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 #
 # Copyright (c) 2008 Juvenn Woo.
 # http://twitter.com/juvenn
@@ -21,7 +21,7 @@ from google.appengine.api import urlfetch
 # Visit http://feedparser.org
 import feedparser
 # Import from user-defined modules.
-from mudel import Channel, Entry
+from mudel import Channel, Entry, Featured
 from helper import timetuple_dt
 
 # URLFetch timedelta(days, fracseconds, fracmicroseconds). 
@@ -29,7 +29,7 @@ from helper import timetuple_dt
 FETCH_TD = timedelta(0, 300, 0) 
 
 def sync():
-    for chnl in Channel.all().filter("is_approved =", True):
+    for chnl in Channel.all().filter("updatable =", True):
 	# Check if chnl was urlfetched in last FETCH_TD.seconds.
 	tmnow = datetime.utcnow()
 	if tmnow-chnl.last_fetch >= FETCH_TD:
@@ -58,12 +58,12 @@ def sync():
 		pa = feedparser.parse(re.content)
 
                 if pa.feed:
-		  # Turn the parsed timetuple into datetime type.
 		  try:
+		    # Turn the parsed timetuple into datetime type.
 		    update_dt = timetuple_dt(pa.feed.updated_parsed)
 		  except:
 		    # Get the chnl's last build date from 
-		    # latest of entries's build date list.
+		    # latest of entries's build date.
 		    # Here assumed entry has updated_parsed attribute,
 		    # attention should be paid.
 		    dts = [e.updated_parsed for e in pa.entries]
@@ -72,17 +72,16 @@ def sync():
 		    update_dt = timetuple_dt(dts[0])
 
 		  if update_dt > chnl.updated:
-		    updated_tuple = chnl.updated.utctimetuple()
+		    updated_tt = chnl.updated.utctimetuple()
 		    update_entries = [e for e in pa.entries \
-			if e.updated_parsed > updated_tuple]
+			if e.updated_parsed > updated_tt]
 		    for e in update_entries:
 			e_update_dt = timetuple_dt(e.updated_parsed)
 			ent = Entry(author = e.get("author"),
 			    title=e.title,
 			    link=e.link,
 			    updated=e_update_dt,
-			    on_date=e_update_dt.date(),
-			    channel=chnl.key())
+			    channel=chnl)
 			# Update entry summary.
 			if e.has_key("content"): ent.summary = e.content
 			elif e.has_key("summary"): ent.summary = e.summary
@@ -99,10 +98,16 @@ def sync():
 
 	      # For permanetly removed channel, stop to update. 
 	      elif re.status_code == 410:
-		chnl.is_approved = False
+		chnl.updatable = False
 		logging.warning("http status 410: " \
 		    "content is permanetly removed from %s.\n" \
-		    "is_approved = False.\n",
+		    "Updatable set to false.\n",
 		    chnl.url)
 
-	      chnl.put() 
+	      chnl.put()
+
+	      # Get latest entry for featured channel.
+	      # Note that f is a list.
+	      f = chnl.featured_set.fetch(1)
+	      if f:
+	        f[0].latest_entry = chnl.entries.order('-updated')[0] 
