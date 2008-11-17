@@ -4,7 +4,7 @@
 # http://twitter.com/juvenn
 #
 
-"""Bulk uploader for Microupdater.
+"""Bulk data loader for Microupdater.
 """
 
 from google.appengine.ext import db
@@ -15,15 +15,14 @@ class ChannelLoader(bulkload.Loader):
   def __init__(self):
     bulkload.Loader.__init__(self, 'Channel',
 	[('producer', str),
-	 ('products', list),
+	  ('products', lambda s: s.split(',')),
 	 ('location', datastore_types.PostalAddress),
+	 ('img_src', datastore_types.Link),
 	 ('url', datastore_types.Link),
-	 ('tags', list),
-	 ('updatable', bool),
+	 ('tags', lambda s: [db.Category(t) for t in s.split(',')])
 	 ])
 
   def HandlEntity(self, entity):
-    entity['tags'] = [db.Category(t) for t in entity['tags']]
     # Make entities searchable.
     ent = search.SearchableEntity(entity)
     return ent

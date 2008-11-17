@@ -18,11 +18,11 @@ import updater
 class MainPage(webapp.RequestHandler):
   def get(self, category, no):
     if category == 'web':
-      entries_query = Entry.all().filter('tags =', 'web')
+      entries_query = Entry.all().filter('channel.tags =', 'web')
     elif category == 'desktop':
-      entries_query = Entry.all().filter('tags =', 'desktop')
+      entries_query = Entry.all().filter('channel.tags =', 'desktop')
     elif category == 'mobile':
-      entries_query = Entry.all().filter('tags  =', 'mobile')
+      entries_query = Entry.all().filter('channel.tags =', 'mobile')
     else:
       # Default for all.
       entries_query = Entry.all()

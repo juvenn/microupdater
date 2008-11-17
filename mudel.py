@@ -21,7 +21,7 @@ class Channel(db.Model):
     location = db.PostalAddressProperty(verbose_name='Location')
 
     # About channel.
-    url = db.LinkProperty(verbose_name='Feed URL',
+    url = db.LinkProperty(verbose_name='Product Blog',
 	required=True)
     tags = db.ListProperty(item_type=db.Category, 
 	verbose_name='Tags')
