@@ -16,26 +16,39 @@ from mudel import Channel, Entry, Featured
 import updater
 
 class MainPage(webapp.RequestHandler):
-  def get(self, category, no):
+  def get(self, category):
     if category == 'web':
-      entries_query = Entry.all().filter('channel.tags =', 'web')
+      entries_query = [e for e in Entry.all().order('-updated') \
+	  if 'web' in e.channel.tags]
+      template_values = {'webtab': 'on'}
     elif category == 'desktop':
-      entries_query = Entry.all().filter('channel.tags =', 'desktop')
+      entries_query = [e for e in Entry.all().order('-updated') \
+	  if 'desktop' in e.channel.tags]
+      template_values = {'desktoptab': 'on'}
     elif category == 'mobile':
-      entries_query = Entry.all().filter('channel.tags =', 'mobile')
+      entries_query = [e for e in Entry.all().order('-updated') \
+	  if 'mobile' in e.channel.tags]
+      template_values = {'mobiletab': 'on'}
     else:
       # Default for all.
-      entries_query = Entry.all()
+      entries_query = Entry.all().order('-updated')
+      template_values = {'alltab': 'on'}
 
-    template_values = { 
-	'entries': entries_query.order('-updated').fetch(50) }
+    featured_entries = [f.latest_entry for f in Featured.all().filter('exclusive =', False) \
+	if f.latest_entry]
+    f = Featured.all().filter('exclusive =', True).get()
+    if f and f.latest_entry: exclusive_entry = f.latest_entry
+    else: exclusive_entry = Entry.all().order('-updated').get()
 
+    template_values['entries'] = entries_query
+    template_values['featured_entries'] = featured_entries
+    template_values['exclusive_entry'] = exclusive_entry
     path = os.path.join(os.path.dirname(__file__), 'base_new.html')
     self.response.out.write(template.render(path, template_values))
 
 # Note that one additional regex group ($|/) routed to get().
 application = webapp.WSGIApplication(
-    [('/($|web|desktop|mobile)($|/)', MainPage)],
+    [('/($|web|desktop|mobile)', MainPage)],
     debug=True)
 
 def main():
@@ -44,4 +57,4 @@ def main():
 if __name__ == "__main__":
   main()
   # Update db in background?
-  updater.sync()
+  # updater.sync()

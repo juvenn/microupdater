@@ -11,6 +11,6 @@ from time import time
 
 # Turn timetuple into datetime.
 # TODO: rare case leap seconds(61) need to be handled.
-def timetuple_dt(tp):
+def timetuple2datetime(tp):
     return datetime(tp[0], tp[1], tp[2], tp[3], tp[4], tp[5])
 

@@ -15,9 +15,6 @@ class ChannelLoader(bulkload.Loader):
   def __init__(self):
     bulkload.Loader.__init__(self, 'Channel',
 	[('producer', str),
-	  ('products', lambda s: s.split(',')),
-	 ('location', datastore_types.PostalAddress),
-	 ('img_src', datastore_types.Link),
 	 ('url', datastore_types.Link),
 	 ('tags', lambda s: [db.Category(t) for t in s.split(',')])
 	 ])
