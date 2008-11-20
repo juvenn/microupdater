@@ -1,4 +1,4 @@
-application: microupdater
+application: officalupdater
 version: 1
 runtime: python
 api_version: 1
@@ -11,7 +11,7 @@ handlers:
 # (though the "other" part will be ignored by handlers),
 # and alike will be routined to main.
 # But "/webb" and alike will not.
-- url: /($|web|desktop|mobile)($|/)
+- url: /($|web|desktop|mobile)
   script: main.py
   
 # Bulk data load.
