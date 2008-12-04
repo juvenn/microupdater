@@ -121,7 +121,7 @@ h3.sectitle {
   background: #fff;
 }
 
-.secline, .dateline {
+.secline {
   background-image: url(/asset/images/grey-seperator.gif);
   background-repeat: repeat-x;
 }
@@ -135,16 +135,11 @@ h3.sectitle {
 
 .timestamp {
   color: #999;
+  display: block;
   font-family: Georgia;
   padding-right: .5em;
   margin-left: -1.5em;
   background: #fff;
-}
-
-.entry-title {
-  font-style: Georgia;
-  font-weight: bold;
-  font-size: 1em;
 }
 
 .entry img {

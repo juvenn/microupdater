@@ -7,6 +7,7 @@
 """Bulk data loader for Microupdater.
 """
 
+from datetime import datetime
 from google.appengine.ext import db
 from google.appengine.ext import bulkload, search
 from google.appengine.api import datastore_types
@@ -24,5 +25,12 @@ class ChannelLoader(bulkload.Loader):
     ent = search.SearchableEntity(entity)
     return ent
 
+class FeaturedLoader(bulkload.Loader):
+  def __init__(self):
+    bulkload.Loader.__init__(self, 'Featured',
+	[('exclusive', bool),
+	 ('channel', datastore_types.Key)])
+  
+
 if __name__ == '__main__':
-  bulkload.main(ChannelLoader())
+  bulkload.main(ChannelLoader(), FeaturedLoader())

@@ -5,13 +5,14 @@
 <head profile="http://www.w3.org/2005/10/profile">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <link rel="icon" href="asset/images/favicon.png" type="image/png" />
-  <link rel="stylesheet" href="asset/layout.css" type="text/css" />
+  <link title="yui stylesheets" rel="stylesheet" href="asset/reset-fonts-grids.css" type="text/css" />
+  <link title="yui stylesheets" rel="stylesheet" href="asset/tabview-core.css" type="text/css" />
   <title>Updater - What's New</title>
 </head>
 <body>
 
-    <div id="nav">
-      <ul id="menu" class="nomarker">
+    <div id="nav" class="yui-navset">
+      <ul class="yui-nav">
 	<li>Updater<sup style="color:#0359c9">0.1</sup></li>
 	<li class="{{alltab|default:"off"}}"><a href="/">All</a></li>
 	<li class="{{webtab|default:"off"}}"><a href="/web">Web</a></li>
@@ -19,31 +20,30 @@
 	<li class="{{mobiletab|default:"off"}}"><a href="/mobile">Mobile</a></li>
       </ul>
     </div>
-  <div id="head">
+  <div id="hd">
     {% block head %}
    {% endblock head %}
   </div>
-  <!-- End div#head -->
 
-  <div id="container">
+  <div id="doc4" class="yui-gc">
 
-    <div id="side">
+    <div class="yui-u first">
+      {% block main %}
+      {% endblock main %}
+    </div>
+    <!-- End main column -->
+
+    <div class="yui-u">
       {% block side %}
 
       {% endblock side %}
     </div>
-    <!-- End div#side -->
-
-    <div id="main">
-      {% block main %}
-      {% endblock main %}
-    </div>
-    <!-- End div#main -->
+    <!-- End sidebar -->
 
   </div>
-  <!-- End div#container -->
+  <!-- End the container -->
 
-  <div id="foot"><p>Copyright (c) 2008. Thanks for your visiting, UPDATER is still in an early prototype stage, and will be improved later. Remember checking it some day later.</p>
+  <div id="ft"><p>Copyright (c) 2008. Thanks for your visiting, UPDATER is still in an early prototype stage, and will be improved later. Remember checking it some day later.</p>
   </div>
   <!-- End div#foot -->
 </body>
