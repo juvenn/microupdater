@@ -62,14 +62,14 @@ class Channel(db.Model):
 	    return self
 
     def get_updates(self):
-    """Update the self channel
+      """Update the self channel
     
-    Try to fetch the feed by urlfetch.fetch, and parse it by feedparser. Extract entries from parsed result.
+      Try to fetch the feed by urlfetch.fetch, and parse it by feedparser. Extract entries from parsed result.
     
-    Returns:
-      self, if update succeeded.
-      False, if failed."""
-
+      Returns:
+        self, if update succeeded.
+        False, if failed.
+      """
       # Construct headers.
       h = {}
       if self.etag: h["If-None-Match"] = self.etag

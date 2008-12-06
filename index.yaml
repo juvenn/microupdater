@@ -62,7 +62,7 @@ indexes:
   - name: url
     direction: desc
 
-# Unused in query history -- copied from input.
+# Used 4 times in query history.
 - kind: Entry
   properties:
   - name: channel
@@ -70,6 +70,13 @@ indexes:
     direction: desc
 
 # Unused in query history -- copied from input.
+- kind: Entry
+  properties:
+  - name: channel.tags
+  - name: updated
+    direction: desc
+
+# Used once in query history.
 - kind: Entry
   properties:
   - name: updated

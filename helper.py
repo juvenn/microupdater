@@ -8,9 +8,13 @@
 
 from datetime import datetime, timedelta
 from time import time
+import math
+import random
 
 # Turn timetuple into datetime.
 # TODO: rare case leap seconds(61) need to be handled.
 def timetuple2datetime(tp):
     return datetime(tp[0], tp[1], tp[2], tp[3], tp[4], tp[5])
 
+def randum(num):
+  return random.randrange(num)

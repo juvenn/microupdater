@@ -2,159 +2,93 @@
  * Microupdater Design
  */
 
-body {
-  font-family: sans-serif;
-  font-size: 80%;
-  color: #333;
-  background-color: #eee;
-  margin: 0;
-}
+@import url("reset-fonts-grids.css");/*TODO: yui hosted url*/
 
-h3 {
-  text-transform: uppercase;
-  margin: 0;
+body {
 }
 
 a:link {
-  color: #024192;
-}
-a:visited {
-  color: #012656;
-}
-a:active {
-  color: #024192;
 }
 a:hover {
-  color: #0359c9;
-  font-style: italic;
+  font-style: oblique;
+}
+a:visited {
 }
 
-.nomarker {
-  list-style-type: none;
-}
-
-.featured {
-  padding: .5em;
-  margin: auto;
-  background-color: #f1f7fe;
-  -moz-border-radius: .5em;
-  -webkit-border-radius: .5em;
-  border-radius: .5em;
-}
-h3.featured-title {
-  color: #024192;
-}
-
-/*------------ #head ------------*/
-
-#head {
-  width: 974px;
-  background-color: #fff;
-  padding-top: .2em;
-  margin: auto;
-}
-
-#top-featured {
-  width: 920px;
-  height: 100px;
-}
-#top-featured h3 {
-  float: right;
-  width: 300px;
-}
-
-/*----#navbar---*/
-#nav {
-  overflow: auto;
-  border-bottom: solid #024192 2px;
-  background: #000;
-}
-
-#menu {
-  color: #eee;
-  margin: 0;
-}
-
-#menu a:visited,
-#menu a:active,
-#menu a:hover,
-#menu a:link {
-  color: #eee;
-  text-decoration: none;
-}
-
-#menu li {
-  font-size: 1em;
+/*-------------- in hd--------------- */
+#hd {
   font-weight: bold;
-  float: left;
-  height: 1.6em;
-  padding: 0.4em 1.6em 0.2em 1.6em;
+  padding-bottom: 1em;
+}
+h1.title {
+  color: #7a0285;
+  font-size: 4em;
+}
+h2.subtitle {
+  color: #666;
+  font-size: 2em;
 }
 
-#menu li:hover, #menu li.on {
-  background-color: #012656;
+/*---------------in main--------------------*/
+#doc4 {
+  padding-bottom: 5em;
 }
 
-/*--------------#container-------------*/
-
-#container {
-  width: 974px;
+#featured {
+  border: groove 4px #ccc;
+}
+h3.side {
+  color: #7a0285;
+  font-size: 2em;
+  font-weight: bold;
+  font-variant: small-caps;
+  padding: .2em;
+}
+/*-----------in list------------------*/
+li.entry {
+  color: #333;
   clear: both;
-  overflow: auto;
-  background-color: #fff;
-  margin: auto;
+  padding: 1em;
 }
 
-/*-------#side--------*/
-
-#side {
-  float: right;
-  width: 350px;
+li.entry:hover {
+  background-color: #ccc;
 }
 
-.side {
-  margin: 1em;
-}
-h3.sectitle {
-  display: inline;
-  font-size: 1em;
-  background: #fff;
-}
-
-.secline {
-  background-image: url(/asset/images/grey-seperator.gif);
-  background-repeat: repeat-x;
-}
-
-/*---------#main--------*/
-
-#main {
-  float: left;
-  width: 600px;
+h4.entry {
+  font-weight: bold;
+  font-size: 1.2em;
+  padding: .5em;
 }
 
 .timestamp {
-  color: #999;
-  display: block;
-  font-family: Georgia;
-  padding-right: .5em;
-  margin-left: -1.5em;
-  background: #fff;
-}
-
-.entry img {
-  float: right;
-  border: solid #ccc 1px;
+  font: small-caption;
+  color: #eee;
   padding: .2em;
+  border-radius: .2em;
+  -moz-border-radius: .2em;
+  -webkit-border-radius: .2em;
+  background-color: #aaa;
+}
+img.entry {
+  float: right;
+  height: 6em;
 }
 
-/*---------------#foot----------------*/
-
-#foot {
-  clear: both;
-  color: #999;
-  padding: 0.4em 1em;
-  border-top: solid #024192 2px;
-  background-color: #000;
+dt {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+dd {
+  padding: .5em;
+}
+/*-------------in ft---------------------*/
+#ft {
+  color: #ccc;
+  border-top: inset 4px #333;
+  background-color: #666;
 }
 
+#ft p {
+  padding: 1em;
+}

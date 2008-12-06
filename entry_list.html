@@ -1,0 +1,12 @@
+  <li class="entry">
+    <span class="timestamp">{{e.updated|timesince}} ago</span>
+  <h4 class="entry">
+    {{e.channel.title}} / 
+    <a href="{{e.link}}">{{e.title}}</a>
+  </h4>
+  <p class="entry">{%if e.imgsrc %}
+  <a href="{{e.imgsrc}}"><img class="entry" src="{{e.imgsrc}}"/></a>
+  {%endif%}
+  {{e.summary|truncatewords:50|removetags:"div p br img script"}}
+  </p>
+  </li>
