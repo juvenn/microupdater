@@ -20,8 +20,6 @@ from helper import timetuple2datetime
 
 class Channel(db.Model):
     # About channel.
-    producer = db.StringProperty(verbose_name='Producer',
-	default=None)
     title = db.StringProperty(verbose_name='Blog Title')
     url = db.LinkProperty(verbose_name='Blog Feed',
 	required=True)
@@ -30,10 +28,11 @@ class Channel(db.Model):
     
     # Channel update status.
     updatable = db.BooleanProperty(default=True)
-    updated = db.DateTimeProperty(default=datetime.utcnow())
-    last_fetch = db.DateTimeProperty(default=datetime.utcnow())
     etag = db.StringProperty()
     last_modified = db.StringProperty()
+    updated = db.DateTimeProperty(default=datetime.utcnow())#TODO
+    last_fetch = db.DateTimeProperty(default=datetime.utcnow())
+    created_at = db.DateTimeProperty(auto_now_add=True)
 
     def initialize(self):
       """Initialize the self channel
@@ -52,8 +51,6 @@ class Channel(db.Model):
 	if re.status_code == 200:
 	  pa = feedparser.parse(re.content)
 	  if pa.feed:
-	    if not self.producer:
-	      self.producer = pa.feed.get("publisher")
 	    if not self.title: self.title = pa.feed.get("title")
 	    self.updated = self.last_fetch = datetime.now()
 	    self.etag = re.headers.get("etag")

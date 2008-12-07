@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block main %}
+<form id="editform" method="post" action="/u/save">
+  <fieldset>
+    <legend>About Your Blog</legend>
+    <label>Blog Title:</label><br />
+    <input type="text" name="btitle" value="{{ titlefield|default:"" }}" /><br />
+    <label>Blog Feed:</label><br />
+    <input type="text" name="bfeed" value="{{ feedfield|default:"http://blog.example.com/feed.xml" }}" /><br />
+  </fieldset>
+  <fieldset>
+    <legend>About Your Company or Team</legend>
+    <label>Company Name:</label><br />
+    <input type="text" name="prname" value="{{prnamefield|default:""}}" /><br />
+    <label>Location:</label><br />
+    <input type="text" name="prlocation" value="{{prloactionfield|default:""}}" /><br />
+    <label>EMail:</label>
+    <span class="form-note">In cases something went wrong, we could notify you.</span><br />
+    <input type="text" name="premail" value="{{premail|default:""}}" /> 
+  </fieldset>
+  <button type="submit">Save</button>
+  <button type="reset">Reset</button>
+</form>
+{% endblock main %}
+
+{% block side %}
+{% include "_addform.html" %}
+{% endblock side %}

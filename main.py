@@ -24,7 +24,7 @@ class MainPage(webapp.RequestHandler):
     template_values = {
 	'entries': entries[:50],
 	'featured_entries': featured_entries}
-    path = os.path.join(os.path.dirname(__file__), 'base_main.html')
+    path = os.path.join(os.path.dirname(__file__), '_home.html')
     self.response.out.write(template.render(path, template_values))
     
   # Get memcached entries.
@@ -44,8 +44,33 @@ class MainPage(webapp.RequestHandler):
     return entries
 
 
-application = webapp.WSGIApplication(
-    [('/', MainPage)])
+class EditPage(webapp.RequestHandler):
+
+  def get(self, action):
+    template_values = {}
+    path = os.path.join(os.path.dirname(__file__), 'u_edit.html')
+    self.response.out.write(template.render(path, template_values))
+
+  def post(self, action):
+    if action == 'edit':
+      pass
+      # TODO: out.write edit template
+      # validate url
+      # try initialize and catch exceptions
+      # return a form with initialized data, if succeeded.
+      # report error to user, else.
+    elif action == 'save':
+      self.put()
+    else: self.get(action)
+
+  def put(self):
+    pass
+    # TODO: parse self.request and put entities into db.
+
+application = webapp.WSGIApplication([
+  ('/', MainPage),
+  ('/u/(add|edit|save)', EditPage)
+  ])
 
 def main():
   run_wsgi_app(application)

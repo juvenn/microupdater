@@ -2,17 +2,45 @@
 {% block main %}
     <ul class="entry">
       {% for e in entries %}
-      {% include "entry_list.html" %}
+  <li class="entry">
+  <h4 class="entry">
+    {{e.channel.title}} / 
+    <a href="{{e.link}}">{{e.title}}</a>
+  </h4>
+    <span class="timestamp">{{e.updated|timesince}} ago</span>
+    {% if e.channel.producer %}
+    from {{ e.channel.producer.name }}, {{ e.channel.producer.location }}
+    {% endif %}
+  <p class="entry">{%if e.imgsrc %}
+  <a href="{{e.imgsrc}}"><img class="entry" src="{{e.imgsrc}}"/></a>
+  {%endif%}
+  </p>
+  </li>
       {% endfor %}
     </ul>
 {% endblock main %}
 
 {% block side %}
+{% include "_addform.html" %}
 <div id="featured">
   <h3 class="side">Featured</h3>
   <ul class="entry featured">
   {% for e in featured_entries %}
-  {% include "entry_list.html" %}
+  <li class="entry">
+  <h4 class="entry">
+    {{e.channel.title}} / 
+    <a href="{{e.link}}">{{e.title}}</a>
+  </h4>
+    <span class="timestamp">{{e.updated|timesince}} ago</span>
+    {% if e.channel.producer %}
+    from {{ e.channel.producer.name }}, {{ e.channel.producer.location }}
+    {% endif %}
+  <p class="entry">{%if e.imgsrc %}
+  <a href="{{e.imgsrc}}"><img class="entry" src="{{e.imgsrc}}"/></a>
+  {%endif%}
+  {{e.summary|truncatewords:50|removetags:"div p br img script"}}
+  </p>
+  </li>
   {% endfor %}
 </ul>
 </div>
