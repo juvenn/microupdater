@@ -24,7 +24,7 @@ class MainPage(webapp.RequestHandler):
     template_values = {
 	'entries': entries[:50],
 	'featured_entries': featured_entries}
-    path = os.path.join(os.path.dirname(__file__), '_home.html')
+    path = os.path.join(os.path.dirname(__file__), '_main.html')
     self.response.out.write(template.render(path, template_values))
     
   # Get memcached entries.
@@ -53,19 +53,39 @@ class EditPage(webapp.RequestHandler):
 
   def post(self, action):
     if action == 'edit':
-      pass
-      # TODO: out.write edit template
-      # validate url
-      # try initialize and catch exceptions
-      # return a form with initialized data, if succeeded.
-      # report error to user, else.
+      path = os.path.join(os.path.dirname(__file__), 'u_edit.html')
+      template_values = {}
+      url = self.request.get("url")
+      if not url:
+	template_values["flash"] = "Seems you have not offered feed url. Do you?"
+      else:
+	chnl = Channel.all().filter("url =", url).get()
+	if not chnl: 
+	 try:
+	  chnl = Channel(url=url)
+	  chnl.initialize()
+	 except:
+	   template_values["flash"] = "Sorry, but we could not fetch your feed. Feel free to contact me for your error."
+	   template_values["urlfield"] = chnl.url
+	 else:
+	   template_values["titlefield"] = chnl.title
+	   template_values["urlfield"] = chnl.url
+	else:
+	  template_values["titlefield"] = chnl.title
+	  if chnl.producer:
+	   template_values["teamfield"] = chnl.producer.name
+	   template_values["locationfield"] = chnl.producer.location
+	   template_values["emailfield"] = chnl.producer.email
+
+      self.response.out.write(template.render(path, template_values))
     elif action == 'save':
       self.put()
     else: self.get(action)
 
   def put(self):
-    pass
+    self.request.get
     # TODO: parse self.request and put entities into db.
+    # out.write succees.
 
 application = webapp.WSGIApplication([
   ('/', MainPage),

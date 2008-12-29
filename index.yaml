@@ -62,7 +62,7 @@ indexes:
   - name: url
     direction: desc
 
-# Used 28 times in query history.
+# Used 4 times in query history.
 - kind: Entry
   properties:
   - name: channel
@@ -76,7 +76,7 @@ indexes:
   - name: updated
     direction: desc
 
-# Used 7 times in query history.
+# Used once in query history.
 - kind: Entry
   properties:
   - name: updated

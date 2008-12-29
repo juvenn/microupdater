@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block main %}
+    <ul class="entry">
+      {% for e in entries %}
+      {% include "entry_list.html" %}
+      {% endfor %}
+    </ul>
+{% endblock main %}
+
+{% block side %}
+<div id="featured">
+  <h3 class="side">My Favourites</h3>
+  <ul class="entry featured">
+  {% for e in featured_entries %}
+  {% include "entry_list.html" %}
+  {% endfor %}
+</ul>
+</div>
+<div id="powered">
+  <h3 class="side">Powered by</h3>
+  <dl>
+    <dt><a href="http://appengine.google.com">AppEngine</a></dt>
+    <dd>Simple yet scalable engine for web applications.</dd>
+    <dt><a href="http://feedparser.org">Universal Feed Parser</a>
+    <dd>Writen in Python by 
+    <a href="http://diveintomark.org">Mark Pilgrim</a>. 
+    I'd like to support RFC 3023, though I have no idea what exactly it is.</dd>
+    <dt>Thanks as well go to:</dt>
+    <dd>
+    <a href="http://www.vim.org">Vim</a> and 
+    <a href="http://www.ubuntu.com">Ubuntu</a>,
+    where I code and breath.
+    Oh, there is <a href="">git</a> as well.
+    </dd>
+  </dl>
+</div>
+{% endblock side %}
+
+{% block footer %}
+    <p>D<sup>2</sup>'ed by 
+    <a href="http://twitter.com/juvenn">juvenn</a>. 
+   You are welcomed to contact me at: machese+microupdater AT gmail.com 
+{% endblock footer %}

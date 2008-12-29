@@ -1,23 +1,24 @@
 {% extends "base.html" %}
 
 {% block main %}
+<a href="/">&lt;&lt; Back to home</a>
 <form id="editform" method="post" action="/u/save">
   <fieldset>
     <legend>About Your Blog</legend>
     <label>Blog Title:</label><br />
-    <input type="text" name="btitle" value="{{ titlefield|default:"" }}" /><br />
+    <input type="text" name="title" value="{{ titlefield|default:"" }}" /><br />
     <label>Blog Feed:</label><br />
-    <input type="text" name="bfeed" value="{{ feedfield|default:"http://blog.example.com/feed.xml" }}" /><br />
+    <input type="text" name="url" value="{{ urlfield|default:"http://blog.example.com/feed.xml" }}" /><br />
   </fieldset>
   <fieldset>
-    <legend>About Your Company or Team</legend>
+    <legend>About Your Team/Company </legend>
     <label>Company Name:</label><br />
-    <input type="text" name="prname" value="{{prnamefield|default:""}}" /><br />
+    <input type="text" name="team" value="{{teamfield|default:""}}" /><br />
     <label>Location:</label><br />
-    <input type="text" name="prlocation" value="{{prloactionfield|default:""}}" /><br />
+    <input type="text" name="location" value="{{loactionfield|default:""}}" /><br />
     <label>EMail:</label>
-    <span class="form-note">In cases something went wrong, we could notify you.</span><br />
-    <input type="text" name="premail" value="{{premail|default:""}}" /> 
+    <span class="form-note">If you feel worried, just leave it blank.</span><br />
+    <input type="text" name="email" value="{{emailfield|default:""}}" /> 
   </fieldset>
   <button type="submit">Save</button>
   <button type="reset">Reset</button>
@@ -25,5 +26,12 @@
 {% endblock main %}
 
 {% block side %}
-{% include "_addform.html" %}
+<div id="contactme" class="side">
+  <h3 class="side">Contact me:</h3>
+  <ul>You are welcomed to contact me at:
+    <li>machese+microupdater AT gmail.com - Preferred</li>
+    <li><a href="http://twitter.com/juvenn">twitter.com/juvenn</a></li>
+    <li><a href="http://friendfeed.com/juvenn">friendfeed.com/juvenn</a></li>
+  </ul>
+</div>
 {% endblock side %}
