@@ -1,13 +1,13 @@
   <li class="entry">
   <h4 class="entry">
-    {{e.channel.title}} / 
-    <a href="{{e.link}}">{{e.title}}</a>
-    <span class="timestamp">{{e.updated|timesince}} ago</span>
+    {{e.channel.title}} 
   </h4>
   <p class="entry">
+  <span class="title"><a href="{{e.link}}">{{e.title}}</a></span> - 
   {%if e.imgsrc %}
   <a href="{{e.imgsrc}}"><img class="entry" src="{{e.imgsrc}}"/></a>
   {%endif%}
   {{ e.summary|truncatewords:60|removetags:"p div img br" }}
   </p>
+    <span class="timestamp">{{e.updated|timesince}} ago</span>
   </li>

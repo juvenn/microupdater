@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block main %}
+  <h3 class="section">Latest Updates</h3>
     <ul class="entry">
       {% for e in entries %}
       {% include "entry_list.html" %}
@@ -8,8 +9,11 @@
 {% endblock main %}
 
 {% block side %}
-<div id="featured">
-  <h3 class="side">My Favourites</h3>
+<div id="recommended" class="side">
+  <h3 class="section">Editor's Choice</h3>
+</div>
+<div id="featured" class="side">
+  <h3 class="section">My Favourites</h3>
   <ul class="entry featured">
   {% for e in featured_entries %}
   {% include "entry_list.html" %}
@@ -17,7 +21,7 @@
 </ul>
 </div>
 <div id="powered">
-  <h3 class="side">Powered by</h3>
+  <h3 class="section">Powered by</h3>
   <dl>
     <dt><a href="http://appengine.google.com">AppEngine</a></dt>
     <dd>Simple yet scalable engine for web applications.</dd>
