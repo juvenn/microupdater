@@ -3,7 +3,7 @@
   <h3 class="section">Latest Updates</h3>
     <ul class="entry">
       {% for e in entries %}
-      {% include "entry_list.html" %}
+      {% include "_entry.html" %}
       {% endfor %}
     </ul>
 {% endblock main %}
@@ -16,7 +16,7 @@
   <h3 class="section">My Favourites</h3>
   <ul class="entry featured">
   {% for e in featured_entries %}
-  {% include "entry_list.html" %}
+  {% include "_entry.html" %}
   {% endfor %}
 </ul>
 </div>
