@@ -1,11 +1,26 @@
 {% extends "base.html" %}
 {% block main %}
-  <h3 class="section">Latest Updates</h3>
+<h3 class="section">Latest Updates:
+  {{last_fetch|date:"r"}}
+</h3>
     <ul class="entry">
-      {% for e in entries %}
-      {% include "_entry.html" %}
-      {% endfor %}
+      {{ entry_list }}
     </ul>
+    <div id="epi" class="pi">
+      <span class="pi-first lt">
+	<a onclick="epi.first()" href="#">&lt;&lt; first</a>
+      </span>
+      <span class="pi-prev lt">
+	<a onclick="epi.prev()" href="#">&lt; prev</a>
+      </span>
+      <span id="epiStatus" class="pi-current">Page 1</span>
+      <span class="pi-next rt">
+	<a onclick="epi.next()" href="#">next &gt;</a>
+      </span>
+      <span class="pi-last rt">
+	<a onclick="epi.last()" href="#">last &gt;&gt;</a>
+      </span>
+    </div>
 {% endblock main %}
 
 {% block side %}
@@ -15,9 +30,6 @@
 <div id="featured" class="side">
   <h3 class="section">My Favourites</h3>
   <ul class="entry featured">
-  {% for e in featured_entries %}
-  {% include "_entry.html" %}
-  {% endfor %}
 </ul>
 </div>
 <div id="powered">

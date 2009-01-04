@@ -4,12 +4,6 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /u/assets/
-  static_dir: assets
-
-- url: /admin/assets/
-  static_dir: assets
-
 - url: /assets/
   static_dir: assets
 
@@ -18,6 +12,6 @@ handlers:
   script: muloader.py
   login: admin
 
-- url: /(|u/.*)
+- url: /*
   script: main.py
   
