@@ -66,9 +66,9 @@ class Feed(db.Model):
 		updated=timetuple2datetime(e.updated_parsed))
 	    if e.has_key("content"):
 	      ent.content = e.content[0].value
-	      mch = re.search('src="(http.*\.(png|gif|jpg))"', ent.content)
-	      if mch: ent.imgsrc = db.Link(mch.group(1))
 	    else: ent.content = e.get("summary")
+	    mch = re.search('src="(http.*\.(png|gif|jpg))"', ent.content)
+	    if mch: ent.imgsrc = db.Link(mch.group(1))
 	    ent.put()
 	  self.updated = upto
 	  self.etag = rp.headers.get("etag")

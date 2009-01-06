@@ -76,7 +76,7 @@ indexes:
   - name: updated
     direction: desc
 
-# Used 3 times in query history.
+# Used 14 times in query history.
 - kind: Entry
   properties:
   - name: updated
