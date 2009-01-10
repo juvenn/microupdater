@@ -30,7 +30,6 @@ a:visited {
 }
 #ft a:hover,
 #hd a:hover {
-  font-style: normal;
   color: #7a0285;
 }
 #ft a:visited,
@@ -62,6 +61,17 @@ div.side {
   margin-bottom: 1em;
 }
 
+ul.link {
+  margin-top: 1em;
+  margin-left: 1em;
+}
+
+li.link {
+  font-size: 1.5em;
+  list-style: square;
+  list-style-position: inside;
+}
+
 p.side {
   font-family: Georgia;
   color: #666;
@@ -69,6 +79,7 @@ p.side {
   margin-top: 1em;
   margin-left: 1em;
 }
+
 /*---------------in main--------------------*/
 .yui-gc {
   padding-top: 1em;
@@ -76,8 +87,7 @@ p.side {
   border-right: solid 1px #999;
   border-left: solid 1px #ccc;
 }
-#featured {
-}
+
 h3.section {
   color: #999;
   font-size: 1.4em;
@@ -123,8 +133,6 @@ p.entry {
   color: #666;
 }
 
-p.entry {
-}
 img.entry {
   height: 6em;
   float: right;

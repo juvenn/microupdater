@@ -1,9 +1,17 @@
-application: officialupdater
+application: microupdater
 version: 1
 runtime: python
 api_version: 1
 
 handlers:
+- url: /rpc_relay.html
+  static_files: assets/rpc_relay.html
+  upload: assets/rpc_relay.html 
+
+- url: /canvas.html
+  static_files: assets/canvas.html
+  upload: assets/canvas.html
+
 - url: /assets/
   static_dir: assets
 

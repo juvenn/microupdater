@@ -12,25 +12,19 @@ from google.appengine.ext import db
 from google.appengine.ext import bulkload, search
 from google.appengine.api import datastore_types
 
-class ChannelLoader(bulkload.Loader):
+class FeedLoader(bulkload.Loader):
   def __init__(self):
-    bulkload.Loader.__init__(self, 'Channel',
-	[('producer', str),
+    bulkload.Loader.__init__(self, 'Feed',
+	[('key_name', str),
 	 ('url', datastore_types.Link),
-	 ('tags', lambda s: [db.Category(t) for t in s.split(',')])
+	 ('updated', lambda s: datetime(s[0], s[1], s[2]))
 	 ])
 
-  def HandlEntity(self, entity):
+  def HandleEntity(self, entity):
     # Make entities searchable.
     ent = search.SearchableEntity(entity)
     return ent
 
-class FeaturedLoader(bulkload.Loader):
-  def __init__(self):
-    bulkload.Loader.__init__(self, 'Featured',
-	[('exclusive', bool),
-	 ('channel', datastore_types.Key)])
-  
 
 if __name__ == '__main__':
-  bulkload.main(ChannelLoader(), FeaturedLoader())
+  bulkload.main(FeedLoader())

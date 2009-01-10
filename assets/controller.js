@@ -5,6 +5,7 @@
  *
  */
 
+
 var PageInator = Class.create({
   initialize: function(selector, len) {
     this.slices = $$(selector).eachSlice(len);

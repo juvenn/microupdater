@@ -57,6 +57,7 @@ class Feed(db.Model):
 	if upto > self.updated:
 	  tt = self.updated.utctimetuple()
 	  up_entries = [e for e in pa.entries if e.updated_parsed > tt]
+	  if up_entries: imgpt = re.compile(r'src="(http.*?(png|gif|jpg))"')
 	  for e in up_entries:
 	    ent = Entry(author=e.get("author"),
 		title=e.title,
@@ -64,10 +65,14 @@ class Feed(db.Model):
 		channel_title=e.source.title,
 		channel_url=db.Link(e.source.link),
 		updated=timetuple2datetime(e.updated_parsed))
-	    if e.has_key("content"):
-	      ent.content = e.content[0].value
-	    else: ent.content = e.get("summary")
-	    mch = re.search('src="(http.*\.(png|gif|jpg))"', ent.content)
+	    try:
+	      if e.has_key("content"):
+	        ent.content = e.content[0].value
+	      else: ent.content = e.get("summary")
+	    except UnicodeEncodeError:
+	      logging.error("Non-ascii chars encountered in the entry %s",
+		  e.url)
+	    mch = imgpt.search(ent.content)
 	    if mch: ent.imgsrc = db.Link(mch.group(1))
 	    ent.put()
 	  self.updated = upto

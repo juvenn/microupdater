@@ -29,7 +29,7 @@ class MainPage(webapp.RequestHandler):
     if tvalues: return tvalues
     else:
       entry_list = self.render_entry_list()
-      last_fetch = Feed.get_by_id(1).last_fetch
+      last_fetch = Feed.all().get().last_fetch
       tvalues = {
 	  "entry_list": entry_list,
 	  "last_fetch": last_fetch,
@@ -39,7 +39,7 @@ class MainPage(webapp.RequestHandler):
       return tvalues
 
   def render_entry_list(self):
-    f = Feed.get_by_id(1)
+    f = Feed.all().get()
     f.get_updates()
     # Only latest 7 days' posts fetched
     t = datetime.utcnow() - timedelta(7)
