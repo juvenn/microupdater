@@ -61,6 +61,11 @@ div.side {
   margin-bottom: 1em;
 }
 
+.friend-connect {
+  border: 1px solid #ccc;
+  margin: 0 .5em;
+}
+
 ul.link {
   margin-top: 1em;
   margin-left: 1em;

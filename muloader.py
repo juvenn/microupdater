@@ -16,13 +16,13 @@ class FeedLoader(bulkload.Loader):
   def __init__(self):
     bulkload.Loader.__init__(self, 'Feed',
 	[('key_name', str),
-	 ('url', datastore_types.Link),
-	 ('updated', lambda s: datetime(s[0], s[1], s[2]))
+	 ('url', datastore_types.Link)
 	 ])
 
   def HandleEntity(self, entity):
     # Make entities searchable.
     ent = search.SearchableEntity(entity)
+    ent['updated'] = datetime(2009, 1, 1)
     return ent
 
 
