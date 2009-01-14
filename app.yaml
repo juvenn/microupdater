@@ -20,6 +20,10 @@ handlers:
   script: muloader.py
   login: admin
 
+- url: /admin/feed
+  script: admin.py
+  login: admin
+
 - url: /*
   script: main.py
   

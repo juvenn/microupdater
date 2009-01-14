@@ -20,12 +20,12 @@ from helper import timetuple2datetime
 
 class Feed(db.Model):
   url = db.LinkProperty(required=True)
-  updated = db.DateTimeProperty()
+  updated = db.DateTimeProperty(required=True)
   created_at = db.DateTimeProperty(auto_now_add=True)
   # Update status.
   updatable = db.BooleanProperty(default=True)
   etag = db.StringProperty()
-  last_modified = db.StringProperty()
+  last_modified = db.DateTimeProperty()
   last_fetch = db.DateTimeProperty()
 
   def get_updates(self):
