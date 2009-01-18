@@ -21,7 +21,7 @@ indexes:
   - name: updated
     direction: desc
 
-# Used 5 times in query history.
+# Unused in query history -- copied from input.
 - kind: Feed
   properties:
   - name: created_at

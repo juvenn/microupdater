@@ -9,6 +9,8 @@
 import os
 import logging
 import StringIO
+from datetime import datetime, timedelta
+
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -19,28 +21,24 @@ from helper import *
 class MainPage(webapp.RequestHandler):
 
   def get(self):
-    template_values = self.get_tvalues()
+    f = Feed.get_by_id(1)
+    el = ""
+    if f.last_fetch - datetime.utcnow() > timedelta(0, 300) and f.get_updates():
+      el = self.render_entry_list()
+    else:
+      el = self.get_entry_list()
+    template_values = {"entry_list":el, "last_fetch":f.last_fetch}
     path = os.path.join(os.path.dirname(__file__), '_main.html')
     self.response.out.write(template.render(path, template_values))
-    
-  # Get template values.
-  def get_tvalues(self):
-    tvalues = memcache.get("tvalues")
-    if tvalues: return tvalues
-    else:
-      entry_list = self.render_entry_list()
-      last_fetch = Feed.all().get().last_fetch
-      tvalues = {
-	  "entry_list": entry_list,
-	  "last_fetch": last_fetch,
-	  }
-      if not memcache.set(key="tvalues", value=tvalues, time=300):
-	logging.error("Memcache set failed.")
-      return tvalues
 
+  def get_entry_list(self):
+    el = memcache.get("entry_list")
+    if el: return el
+    else:
+      el = self.render_entry_list()
+      return el
+    
   def render_entry_list(self):
-    f = Feed.all().get()
-    f.get_updates()
     # Only latest 7 days' posts fetched
     t = datetime.utcnow() - timedelta(7)
     entries = Entry.all().filter('updated >', t).order("-updated")
@@ -48,7 +46,10 @@ class MainPage(webapp.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), '_entry.html')
     for e in entries:
       output.write(template.render(path, {"e":e}))
-    return output.getvalue()
+    el = output.getvalue()
+    if not memcache.set(key="entry_list", value=el):
+      logging.error("Memcache set failed.")
+    return el
 
 application = webapp.WSGIApplication([
   ('/*', MainPage),

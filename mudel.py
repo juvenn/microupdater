@@ -36,8 +36,8 @@ class Feed(db.Model):
       False, if failed.
     """
     h = {}
-    if self.etag: h["If-None-Match"] = self.etag
-    if self.last_modified: h["If-Modified-Since"] = self.last_modified
+    h["If-None-Match"] = self.etag
+    h["If-Modified-Since"] = self.last_modified
     try:
       rp = urlfetch.fetch(url=self.url, headers=h)
       self.last_fetch = datetime.utcnow()

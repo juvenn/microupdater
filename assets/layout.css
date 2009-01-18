@@ -139,7 +139,7 @@ p.entry {
 }
 
 img.entry {
-  height: 6em;
+  max-height: 6em;
   float: right;
 }
 
