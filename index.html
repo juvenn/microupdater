@@ -1,7 +1,13 @@
-{% extends "base.html" %}
-{% block header %}
-  <title>Microupdater - latest news from product blogs</title>
+<!DOCTYPE html 
+      PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+<head profile="http://www.w3.org/2005/10/profile">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="icon" href="assets/images/favicon.png" type="image/png" />
+  <link title="screen" rel="stylesheet" href="/assets/layout.css" type="text/css" />
   <link title="Microupdater River" rel="alternate" type="application/atom+xml" href="http://www.google.com/reader/public/atom/user%2F03873481103047480785%2Flabel%2Friver">
+  <title>Microupdater - latest news from product blogs</title>
    <script type="text/javascript" src="https://www.google.com/reader/ui/publisher-en.js"></script>
    <script type="text/javascript" src="http://www.google.com/friendconnect/script/friendconnect.js"></script>
    <script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAA4Cddab9Phy4pfxGSBzqzPhQC9OJn7sCV5isX-EmQbo3ntX-J5xRtALk9rVAqB93RCNDpVVjzQvuUZg"></script>
@@ -28,8 +34,19 @@
     skin['POSTS_PER_PAGE'] = '5';
     google.friendconnect.container.setParentUrl('/' /* location of rpc_relay.html and canvas.html */);
    </script>
-{% endblock header%}
-{% block main %}
+  <script type="text/javascript" src="/assets/controller.js"></script>
+</head>
+<body>
+  <div id="doc4">
+  <div id="hd">
+    <h1 class="title"><a href="/">Microupdater.<img src="/assets/images/sig.png" /></a></h1>
+    <h2 class="subtitle">latest news from product blogs</h2>
+  </div>
+
+  <div class="yui-gc">
+
+    <div class="yui-u first">
+
 <h3 class="section">Latest Updates:
   {{last_fetch|date:"r"}}
 </h3>
@@ -51,9 +68,13 @@
 	<a onclick="epi.last()" href="#">last &gt;&gt;</a>
       </span>
     </div>
-{% endblock main %}
 
-{% block side %}
+
+    </div>
+    <!-- End main column -->
+
+    <div class="yui-u">
+
 <div class="side">
 <div id="div-1231569721654" class="friend-connect" style="border-bottom:0;">
   <script type="text/javascript">
@@ -91,4 +112,26 @@
     <li class="link"><a href="http://microupdater.blogspot.com">Microupdater Blog</a></li>
   </ul>
 </div>
-{% endblock side %}
+
+
+    </div>
+    <!-- End sidebar -->
+
+  </div>
+  <!-- End the container -->
+
+  <div id="ft">
+     <p>D<sup>2</sup>-ed by 
+    <a href="http://twitter.com/juvenn">juvenn</a>. 
+    Powered by Google 
+    <a href="http://appengine.google.com">AppEngine</a> and 
+    <a href="http://reader.google.com">Reader</a>.
+    Coded in <a href="http://www.vim.org">VIM</a>, 
+    <a href="http://www.ubuntu.com">Ubuntu</a>, and there's 
+    <a href="http://git-scm.com/">Git</a> as well.
+    </p>
+  </div>
+  <!-- End div#foot -->
+</div>
+</body>
+</html>

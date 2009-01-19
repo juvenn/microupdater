@@ -23,12 +23,12 @@ class MainPage(webapp.RequestHandler):
   def get(self):
     f = Feed.get_by_id(1)
     el = ""
-    if f.last_fetch - datetime.utcnow() > timedelta(0, 300) and f.get_updates():
+    if datetime.utcnow() - f.last_fetch > timedelta(0, 300) and f.get_updates():
       el = self.render_entry_list()
     else:
       el = self.get_entry_list()
     template_values = {"entry_list":el, "last_fetch":f.last_fetch}
-    path = os.path.join(os.path.dirname(__file__), '_main.html')
+    path = os.path.join(os.path.dirname(__file__), 'index.html')
     self.response.out.write(template.render(path, template_values))
 
   def get_entry_list(self):
