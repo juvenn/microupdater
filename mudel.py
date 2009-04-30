@@ -4,111 +4,38 @@
 # http://twitter.com/juvenn
 #
 
-"""Customized db schema for Microupdater."""
+"""Data Model"""
 
-from datetime import datetime, timedelta
 import logging
-import re
-
+from datetime import datetime, timedelta
 from google.appengine.ext import db
-from google.appengine.api import urlfetch
 
-# Universal Feed Parser. Copyright (c) Mark Pilgrim.
-# Visit http://feedparser.org
-import feedparser
-from helper import timetuple2datetime
-
-class Feed(db.Model):
-  url = db.LinkProperty(required=True)
-  updated = db.DateTimeProperty(required=True)
+class Channel(db.Model):
+  title = db.StringProperty(required=True)
+  link = db.LinkProperty(required=True)
   created_at = db.DateTimeProperty(auto_now_add=True)
-  # Update status.
-  updatable = db.BooleanProperty(default=True)
-  etag = db.StringProperty()
-  last_modified = db.DateTimeProperty()
-  last_fetch = db.DateTimeProperty()
-
-  def get_updates(self):
-    """Update self
-
-    Returns:
-      self, if update succeeded.
-      False, if failed.
-    """
-    h = {}
-    h["If-None-Match"] = self.etag
-    h["If-Modified-Since"] = self.last_modified
-    try:
-      rp = urlfetch.fetch(url=self.url, headers=h)
-      self.last_fetch = datetime.utcnow()
-    except:
-      logging.erro("%s urlfetch failed.", self.url)
-      return False
-
-    if rp.status_code == 200:
-      try:
-	pa = feedparser.parse(rp.content)
-      except:
-	logging.warning("Feedparser failed to parse %s.", self.url)
-	return False
-
-      if pa.feed:
-	upto = timetuple2datetime(pa.feed.updated_parsed)
-	if upto > self.updated:
-	  tt = self.updated.utctimetuple()
-	  up_entries = [e for e in pa.entries if e.updated_parsed > tt]
-	  if up_entries: imgpt = re.compile(r'src="(http.*?(png|gif|jpg))"')
-	  for e in up_entries:
-	    ent = Entry(author=e.get("author"),
-		title=e.title,
-		url=e.link,
-		channel_title=e.source.title,
-		channel_url=db.Link(e.source.link),
-		updated=timetuple2datetime(e.updated_parsed))
-	    try:
-	      if e.has_key("content"):
-	        ent.content = e.content[0].value
-	      else: ent.content = e.get("summary")
-	    except UnicodeEncodeError:
-	      logging.error("Non-ascii chars encountered in the entry %s",
-		  e.url)
-	    mch = imgpt.search(ent.content)
-	    if mch: ent.imgsrc = db.Link(mch.group(1))
-	    ent.put()
-	  self.updated = upto
-	  self.etag = rp.headers.get("etag")
-	  self.last_modified = rp.headers.get("last-modified")
-	  self.put()
-	  return self
-
-    elif rp.status_code == 410:
-      self.updatable = False
-      self.put()
-      logging.warning("%s permanetly removed from the server.", self.url)
-    return False
-
+  reader_id = db.StringProperty(required=True)
 
     
 class Entry(db.Model):
   author = db.StringProperty()
   title = db.StringProperty(required=True)
-  url = db.LinkProperty(required=True)
-  content = db.TextProperty()
-  imgsrc = db.LinkProperty()
-  updated = db.DateTimeProperty()
+  link = db.LinkProperty(required=True)
+  summary = db.TextProperty(required=True)
+  published = db.DateTimeProperty(required=True)
+  reader_id = db.StringProperty(required=True)
+  channel = db.ReferenceProperty(Channel,required=True)
 
-  channel_title = db.StringProperty()
-  channel_url = db.LinkProperty()
 
-  # Clear outdated entries, default saving for 30 days.
-  def clear(td=timedelta(30, 0, 0)):
-    """clear()
-    Clear outdated entries, i.e. default 30 days since updated.
+  def cleanup(td=timedelta(30, 0, 0)):
+    """Cleanup datastore.
+    Cleaup by delete old entries, default to published 30 days ago
     """
-    outdated_dt = datetime.utcnow() - td
-    for ent in Entry.all().order('updated'):
-      if ent.updated <= outdated_dt: ent.delete()
-      logging.info("Entries updated before %s were cleared.",
-	  outdated_dt.strftime("%c"))
-
+    outdate = datetime.utcnow() - td
+    entry_query = Entry.all.order("published").filter("published <=",outdate)
+    entries = entry_query.fetch(1000)
+    for e in entries: 
+      e.delete()
+    logging.info("Entries published before %s were succeesfully deleted.",
+	outdate.isoformat())
 

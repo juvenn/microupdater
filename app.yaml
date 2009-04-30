@@ -24,6 +24,14 @@ handlers:
   script: admin.py
   login: admin
 
+- url: /admin/croned
+  script: croned.py
+  login: admin
+
+- url: /admin/remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
 - url: /*
   script: main.py
   
