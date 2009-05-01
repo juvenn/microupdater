@@ -5,24 +5,15 @@ api_version: 1
 
 handlers:
 - url: /rpc_relay.html
-  static_files: assets/rpc_relay.html
-  upload: assets/rpc_relay.html 
+  static_files: static/rpc_relay.html
+  upload: static/rpc_relay.html 
 
 - url: /canvas.html
-  static_files: assets/canvas.html
-  upload: assets/canvas.html
+  static_files: static/canvas.html
+  upload: static/canvas.html
 
-- url: /assets/
-  static_dir: assets
-
-# Bulk data load.
-- url: /admin/import
-  script: muloader.py
-  login: admin
-
-- url: /admin/feed
-  script: admin.py
-  login: admin
+- url: /static
+  static_dir: static
 
 - url: /admin/croned
   script: croned.py

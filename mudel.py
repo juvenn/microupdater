@@ -26,7 +26,11 @@ class Entry(db.Model):
   reader_id = db.StringProperty(required=True)
   channel = db.ReferenceProperty(Channel,required=True)
 
+  @property
+  def pub_date(self):
+    return self.published.date()
 
+  @classmethod
   def cleanup(td=timedelta(30, 0, 0)):
     """Cleanup datastore.
     Cleaup by delete old entries, default to published 30 days ago

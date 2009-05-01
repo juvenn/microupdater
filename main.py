@@ -8,51 +8,82 @@
 
 import os
 import logging
-import StringIO
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import memcache
-from mudel import Entry, Feed
-from helper import *
+from mudel import Entry, Channel
 
 class MainPage(webapp.RequestHandler):
-
   def get(self):
-    f = Feed.get_by_id(1)
-    el = ""
-    if datetime.utcnow() - f.last_fetch > timedelta(0, 300) and f.get_updates():
-      el = self.render_entry_list()
-    else:
-      el = self.get_entry_list()
-    template_values = {"entry_list":el, "last_fetch":f.last_fetch}
-    path = os.path.join(os.path.dirname(__file__), 'index.html')
-    self.response.out.write(template.render(path, template_values))
+    sec_entry = self.get_sec_entry()
+    path = os.path.join(os.path.dirname(__file__), "main.html")
+    self.response.out.write(template.render(path, 
+      {"sec_entry":sec_entry}))
 
-  def get_entry_list(self):
-    el = memcache.get("entry_list")
-    if el: return el
+  def get_sec_entry(self, from_date=datetime.utcnow().date()):
+    """Get html rendered entries
+     
+    Check against memcache if any new entries in datastore not cached:
+    if do, refetch entries from datastore, and cache it use from_date
+    as the key; return the cached value, if not.
+
+    Args:
+      from_date, the entries published on from_date and from_date-1 
+                 will be fetched and cached.
+
+    Returns:
+      A slice of HTML containing entries.
+    """
+    datestamp = from_date.strftime("%Y%m%d")
+    cached = memcache.get(datestamp, namespace="entry")
+
+    max_dt = datetime.combine(from_date, time.max)
+    min_dt = datetime.combine(from_date-timedelta(1), time.min)
+    # Filter for min_dt<=published>=max_dt,
+    # splitted for readablity.
+    q = Entry.all().order("-published").filter("published <=",max_dt)
+    entries_query = q.filter("published >=", min_dt)
+    # Get the updated time of the date
+    updated = entries_query.get().published
+    if cached and (cached["updated_at"] >= updated):
+      return cached["sec_entry"]
     else:
-      el = self.render_entry_list()
-      return el
-    
-  def render_entry_list(self):
-    # Only latest 7 days' posts fetched
-    t = datetime.utcnow() - timedelta(7)
-    entries = Entry.all().filter('updated >', t).order("-updated")
-    output = StringIO.StringIO()
-    path = os.path.join(os.path.dirname(__file__), '_entry.html')
+      sec_entry = self.render_sec_entry(entries_query, from_date)
+      cache_item = {"updated_at":updated,
+	  "sec_entry":sec_entry}
+      # Use datestamp for key, in convinience of get
+      # cached for 24 hours
+      if not memcache.set(datestamp,cache_item,
+	  time=86400,namespace='entry'):
+	logging.error("%s -entry memcache failed.", datestamp)
+      return sec_entry
+
+  def render_sec_entry(self, query, from_date):
+    """Render the queried entries
+
+    Render entries from query, from_date's entries (em_entries) will
+    be more in detail, compared to from_date-1 's.
+
+    Returns: a html slice containing rendered entries
+    """
+    entries = query.fetch(100)
+    em_entries = []
     for e in entries:
-      output.write(template.render(path, {"e":e}))
-    el = output.getvalue()
-    if not memcache.set(key="entry_list", value=el):
-      logging.error("Memcache set failed.")
-    return el
+      if e.pub_date == from_date:
+	entries.remove(e)
+	em_entries.append(e)
+
+    path = os.path.join(os.path.dirname(__file__), "_entry.html")
+    rendered = template.render(path,
+	{"em_entries":em_entries,"entries":entries})
+    return rendered
+
 
 application = webapp.WSGIApplication([
-  ('/*', MainPage),
+  ("/*", MainPage),
   ])
 
 def main():
