@@ -51,11 +51,11 @@ class Updater(db.Model):
       if redirect_url: 
 	self.url = redirect_url
 	logging.warning("%s permanetly redirect, changed to %s." % (self.url, redirect_url))
-      else: logging.warning("%s permanetly redirected.", self.url)
+      else: logging.warning("%s permanetly redirected." % self.url)
     elif resp.status_code == 410:
       self.updatable = False
-      logging.warning("%s permanetly removed.", self.url)
-    else: logging.error("urlfetch response status code: %s", resp.status_code)
+      logging.warning("%s permanetly removed." % self.url)
+    else: logging.error("urlfetch response status code: %s" % resp.status_code)
 
     self.etag = resp.headers.get("etag")
     self.last_modified = resp.headers.get("last-modified")

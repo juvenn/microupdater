@@ -40,6 +40,6 @@ class Entry(db.Model):
     entries = entry_query.fetch(1000)
     for e in entries: 
       e.delete()
-    logging.info("Entries published before %s were succeesfully deleted.",
+    logging.info("Entries published before %s were succeesfully deleted." %
 	outdate.isoformat())
 

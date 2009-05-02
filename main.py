@@ -58,7 +58,7 @@ class MainPage(webapp.RequestHandler):
       # cached for 24 hours
       if not memcache.set(datestamp,cache_item,
 	  time=86400,namespace='entry'):
-	logging.error("%s -entry memcache failed.", datestamp)
+	logging.error("%s -entry memcache failed." % datestamp)
       return sec_entry
 
   def render_sec_entry(self, query, from_date):
@@ -78,7 +78,10 @@ class MainPage(webapp.RequestHandler):
 
     path = os.path.join(os.path.dirname(__file__), "_entry.html")
     rendered = template.render(path,
-	{"em_entries":em_entries,"entries":entries})
+	{"from_date":from_date, 
+	 "em_entries":em_entries,
+	 "entries":entries}
+	)
     return rendered
 
 

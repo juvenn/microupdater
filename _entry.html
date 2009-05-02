@@ -1,3 +1,46 @@
+      <div class="section">
+	<h3 class="section">
+	  {{ from_date|date:'l' }}
+	</h3>
+        {% if em_entries %}
+        <ul class="entry em">
+	  {% for e in entries %}
+	  <li>
+	  {{ e.published|time:"P"}} GMT
+	  {{ e.author }} / 
+	  <a href="{{e.channel.link}}">{{ e.channel.title}}</a><br />
+	  <span class="title">
+	    <a href="{{e.link}}">{{ e.title|truncatewords:15 }}</a>
+	  </span>
+	  - {{ e.summary|truncatewords:50|removetags:"p div img br a pre blockquote b ul li ol"}}
+	  </li>
+	  {% endfor %}
+        </ul>
+        {% else %}
+        Sorry, no news yet. You may wanna check
+        <a href="http://techmeme.com">Techmeme.com</a> :p
+        {% endif %}
+      </div>
+
+      <div class="section">
+	<h3 class="section">
+	  The Day Before
+	</h3>
+        {% if entries %}
+        <ul class="entry">
+	  {% for e in entries %}
+	  <li>
+	  {{ e.published|time:"P"}} GMT
+	  {{ e.author }} / 
+	  <a href="{{e.channel.link}}">{{ e.channel.title}}</a>
+	  - <a href="{{e.link}}">{{ e.title|truncatewords:15 }}</a>
+	  </li>
+	  {% endfor %}
+        </ul>
+        {% else %}
+        Unbelievable, no updates all day! :o 
+        {% endif %}
+      </div>
   <li class="entry">
   <h4 class="entry">
     {{e.author}} /
@@ -5,10 +48,7 @@
   </h4>
   <p class="entry">
   <span class="title"><a href="{{e.url}}">{{e.title|truncatewords:15}}</a></span> - 
-  {%if e.imgsrc %}
-  <a href="{{e.imgsrc}}"><img class="entry" src="{{e.imgsrc}}"/></a>
-  {%endif%}
-  {{ e.content|truncatewords:50|removetags:"p div img br a pre blockquote b ul li ol" }}
+  {{ e.content }}
   </p>
   <div>
     <span class="timestamp">{{e.updated|timesince}} ago</span>
