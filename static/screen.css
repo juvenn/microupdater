@@ -1,0 +1,143 @@
+/**
+ * Microupdater Design
+ */
+
+
+body {
+  background-color: #ccc;
+}
+
+a {
+  text-decoration: none;
+}
+a:visited {
+  color: #004ca3;
+}
+a:link {
+  color: #0076d0;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+h1.title a:link,
+.channel a:link,
+h1.title a:visited,
+.channel a:visited {
+  color: #000;
+}
+.channel a:hover,
+h1.title a:hover {
+  color: #0076d0;
+  text-decoration: none;
+}
+
+#doc4 {
+  background-color: #fff;
+  border-top: solid 4px #000;
+}
+
+.time:after {
+  content: " UTC";
+}
+.time {
+  color: #d69300;
+}
+
+/*-------------- in hd--------------- */
+#hd {
+  color: #666;
+  text-align: center;
+  padding-top: 2em;
+  padding-bottom: 4em;
+  border-bottom: solid 4px #ccc;
+}
+
+#logo {
+  float: right;
+  width: 30%;
+  text-align: left;
+}
+
+h1.title {
+  font-family: Impact, sans-serif;
+  font-size: 44px;
+  background-image: url("/static/images/color-bar.png");
+  background-position: bottom left;
+  background-repeat: no-repeat;
+}
+
+h2.subtitle {
+  color: #666;
+  font-family: Lucida;
+  text-transform: uppercase;
+  font-size: 2.4em;
+  padding-top: .2em;
+}
+
+/*---------------in yui-gc--------------------*/
+
+.yui-gc div.first {
+  width: 640px;
+  border-right: solid 2px #ccc;
+}
+
+/*---------------in main--------------------*/
+.yui-u {
+  padding-top: 1em;
+  padding-bottom: 5em;
+}
+
+h3.section {
+  color: #999;
+  font-size: 1.4em;
+  font-weight: bold;
+  font-variant: small-caps;
+  margin-left: .4em;
+  border-bottom: solid .1em #ccc;
+}
+
+/*-----------in list------------------*/
+ul.entries {
+  margin-left: .5em;
+}
+
+li.entry {
+  font-family: Helvetica;
+  color: #333;
+  list-style: none;
+  line-height: 1.4em;
+  padding: .8em .6em;
+}
+
+li.entry .channel,
+li.entry .title {
+  font-size: 1.2em;
+  text-transform: capitalize;
+}
+
+li.entry .channel:after {
+  content: " / "
+}
+
+li.entry .meta {
+  font-variant: small-caps;
+}
+
+
+p.entry img {
+  max-height: 6em;
+  max-width: 6em;
+  float: right;
+}
+
+/*-------------in ft---------------------*/
+#ft {
+  color: #999;
+  font-size: 1.2em;
+  text-align: center;
+  padding-top: 2em;
+  padding-bottom: 2em;
+  border-top: solid 4px #ccc;
+}
+
