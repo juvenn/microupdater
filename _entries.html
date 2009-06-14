@@ -1,0 +1,25 @@
+      {% regroup entries by pub_date as grouped %}
+      {% for g in grouped %}
+        <div class="separator">{{g.grouper|date:"l, d N"}}</div>
+	  <ul class="entries">
+	    {% for e in g.list %}
+	    <li class="entry">
+	    <div class="meta">
+	      <span class="time">{{e.published|time:"h:i A"}} GMT</span>
+	      <span class="channel">
+		<a href="{{e.channel.blog}}">{{e.channel.title|truncatewords:5}}</a>
+	      </span>
+	    </div>
+	      <p class="entry">
+	        {% if e.author %}
+	        <span class="author">{{e.author}}</span>
+		{% endif %}
+	        <span class="title">
+	          <a href="{{e.link}}">{{e.title|truncatewords:10}}</a>
+	        </span>
+		<span class="summary">{{e.summary|striptags|truncatewords:50}}</span>
+	      </p>
+	    </li>
+	    {% endfor %}
+	  </ul>
+      {% endfor %}

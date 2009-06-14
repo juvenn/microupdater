@@ -4,7 +4,7 @@
 # http://twitter.com/juvenn
 #
 
-"""Main routine of Microupdater."""
+"""Main Page Handler"""
 
 import os
 import logging
@@ -14,75 +14,51 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import memcache
-from mudel import Entry, Channel
+from mudel import Entry, Channel, Featured
 
 class MainPage(webapp.RequestHandler):
   def get(self):
-    sec_entry = self.get_sec_entry()
-    path = os.path.join(os.path.dirname(__file__), "main.html")
-    self.response.out.write(template.render(path, 
-      {"sec_entry":sec_entry}))
+    template_values = self.get_sections()
+    path = self.build_path("main.html")
+    self.response.out.write(template.render(path,template_values))
 
-  def get_sec_entry(self, from_date=datetime.utcnow().date()):
-    """Get html rendered entries
-     
-    Check against memcache if any new entries in datastore not cached:
-    if do, refetch entries from datastore, and cache it use from_date
-    as the key; return the cached value, if not.
+  def get_sections(self):
+    sec = memcache.get_multi(
+	["entries",
+	 "sponsors",
+	 "upcoming"],
+	key_prefix="sec_")
+    if not sec.get("entries"):
+      sec["entries"] = self.render_sec_entries()
+    if not sec.get("sponsors"):
+      sec["sponsors"] = self.render_sec_sponsors()
+    #if not sec.get("extra"):
+      #sec["extra"] = self.render_sec_extra()
+    if memcache.add_multi(sec, key_prefix="sec_"):
+      # Failed to cache some keys. Note that add_multi will
+      # return list of keys which FAILED to cache. Ref SDK doc
+      logging.warning("memcache.add_multi() not succeded.")
+    return sec
 
-    Args:
-      from_date, the entries published on from_date and from_date-1 
-                 will be fetched and cached.
+  def render_sec_entries(self):
+    entries_query = Entry.all().order("-published")
+    entries = entries_query.fetch(25)
+    path = self.build_path("_entries.html")
+    return template.render(path, {"entries":entries})
 
-    Returns:
-      A slice of HTML containing entries.
-    """
-    datestamp = from_date.strftime("%Y%m%d")
-    cached = memcache.get(datestamp, namespace="entry")
+  def render_sec_sponsors(self):
+    f_query = Featured.all().filter("enabled =", True)
+    fs = f_query.fetch(6)
+    cls = [f.channel for f in fs if f.channel]
+    entries = []
+    for cl in cls:
+      e = cl.entry_set.get()
+      if e: entries.append(e)
+    path = self.build_path("_sponsors.html")
+    return template.render(path, {"entries":entries})
 
-    max_dt = datetime.combine(from_date, time.max)
-    min_dt = datetime.combine(from_date-timedelta(1), time.min)
-    # Filter for min_dt<=published>=max_dt,
-    # splitted for readablity.
-    q = Entry.all().order("-published").filter("published <=",max_dt)
-    entries_query = q.filter("published >=", min_dt)
-    # Get the updated time of the date
-    updated = entries_query.get().published
-    if cached and (cached["updated_at"] >= updated):
-      return cached["sec_entry"]
-    else:
-      sec_entry = self.render_sec_entry(entries_query, from_date)
-      cache_item = {"updated_at":updated,
-	  "sec_entry":sec_entry}
-      # Use datestamp for key, in convinience of get
-      # cached for 24 hours
-      if not memcache.set(datestamp,cache_item,
-	  time=86400,namespace='entry'):
-	logging.error("%s -entry memcache failed." % datestamp)
-      return sec_entry
-
-  def render_sec_entry(self, query, from_date):
-    """Render the queried entries
-
-    Render entries from query, from_date's entries (em_entries) will
-    be more in detail, compared to from_date-1 's.
-
-    Returns: a html slice containing rendered entries
-    """
-    entries = query.fetch(100)
-    em_entries = []
-    for e in entries:
-      if e.pub_date == from_date:
-	entries.remove(e)
-	em_entries.append(e)
-
-    path = os.path.join(os.path.dirname(__file__), "_entry.html")
-    rendered = template.render(path,
-	{"from_date":from_date, 
-	 "em_entries":em_entries,
-	 "entries":entries}
-	)
-    return rendered
+  def build_path(self, path):
+    return os.path.join(os.path.dirname(__file__), path)
 
 
 application = webapp.WSGIApplication([

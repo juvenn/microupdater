@@ -5,7 +5,7 @@
 #
 
 
-"""Remote Data Sync"""
+"""Remote Data Sync Module"""
 
 import logging
 from datetime import datetime
@@ -29,23 +29,41 @@ class Updater(db.Model):
   def last_fetched(self):
     e = Entry.all().order("-published").get()
     if e: return e.published
-    # Gurantee an initial datetime if no entries 
+    # Gaurantee an initial datetime if no entries 
     else: return datetime(2009,4,23)
 
-  def fetch(self):
-    """Fetch data"""
-    header = {}
-    header["If-None-Match"] = self.etag
-    header["If-Modified-Since"] = self.last_modified
-    header["User-Agent"] = "Microupdater/0.5 http://microupdater.com"
-    try:
-      resp = urlfetch.fetch(url=self.url, headers=header)
-    except Error, e:
-      logging.warning("%s urlfetch failed. %s" % (self.url, e))
-      return
+  def sync(self):
+    """Synchronization
+    Returns:
+      True, if succeeded;
+      False, if not.
+    """
+    data = self._fetch()
+    if data:
+      entries = self._extract(data)
+      if entries:
+	if self._putd(entries): return True
+    return False
 
-    if resp.status_code == 202:
-      self._extract(resp.content)
+
+  def _fetch(self):
+    """Fetch Data
+    Returns:
+      fetched data body, if succeeded;
+      None, if not.
+    """
+    h = {}
+    h["If-None-Match"] = self.etag
+    h["If-Modified-Since"] = self.last_modified
+    h["User-Agent"] = "Microupdater/0.5 http://microupdater.com"
+    try:
+      resp = urlfetch.fetch(url=self.url, headers=h)
+    except urlfetch.Error:
+      logging.warning("%s urlfetch failed" % self.url)
+      raise
+
+    if resp.status_code == 200:
+      return resp.content
     elif resp.status_code == 301:
       redirect_url = resp.header.get("location")
       if redirect_url: 
@@ -60,35 +78,51 @@ class Updater(db.Model):
     self.etag = resp.headers.get("etag")
     self.last_modified = resp.headers.get("last-modified")
     self.put()
-    return
+    return None
 
   def _extract(self, data):
-    """Parse the data and put into datastore."""
+    """Extract New Entries
+    Returns:
+      New entries, if there are;
+      None, if not.
+    """
     pa = feedparser.parse(data)
     if pa.feed:
-      tt = self.last_fetched.isoformat()
+      # "Z" of UTC timezone
+      tt = self.last_fetched.isoformat() + "Z"
       entries = [e for e in pa.entries if e.published > tt]
-      if entries:
-	for e in entries:
-	  chnl = Channel.filter("reader_id =", e.source.id).get()
-	  if not chnl:
-	    chnl = Channel(title=e.source.title,
-		link=e.source.link,
-		reader_id=e.source.id
-		)
-	    chnl.put()
+      return entries
 
-	  if e.haskey("content"): content = e.content[0].value
-	  else: content = e.summary
-	  t = e.published_parsed
-	  pub_at = datetime(t[0],t[1],t[2],t[3],t[4],t[5])
-	  ent = Entry(title=e.title,
-	      link=e.link,
-	      summary=content,
-	      author=e.author,
-	      published=pub_at,
-	      reader_id=e.id,
-	      channel=chnl
-	      ) 
-	  ent.put()
+  def _putd(self, entries):
+    """Put Entities
+    Returns:
+      True, if succeeded;
+      False, if not.
+    """
+    if not entries: return False
+    entities = []
+    for e in entries:
+      if Entry.all().filter("reader_id =", e.id).get(): break
+      chnl = Channel.all().filter("reader_id =", e.source.id).get()
+      if not chnl:
+	src_title = e.source.title.split(" - ")[0]
+	chnl = Channel(title=src_title,
+		       blog=e.source.link,
+		       reader_id=e.source.id)
+	chnl.put()
+      if e.has_key("content"): content = e.content[0].value
+      else: content = e.summary
+      t = e.published_parsed
+      pub_at = datetime(t[0],t[1],t[2],t[3],t[4],t[5])
+      if e.author == "(author unknown)": e.author = None
+      ent = Entry(title=e.title,
+	          link=e.link,
+	          summary=content,
+	          author=e.author,
+	          published=pub_at,
+	          reader_id=e.id,
+	          channel=chnl) 
+      entities.append(ent)
+    db.put(entities)
+    return True
 

@@ -1,11 +1,11 @@
-{% extend "base.html" %}
+{% extends "base.html" %}
 
 {% block main %}
-{{ sec_entry }}
+{{ entries }}
 {% endblock main %}
 
 {% block side %}
 <div class="section">
-  <h3 class="section">Editor's Choice</h3>
+  {{ sponsors }}
 </div>
 {% endblock side%}

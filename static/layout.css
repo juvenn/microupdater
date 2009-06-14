@@ -2,51 +2,35 @@
  * Microupdater Design
  */
 
-@import url("reset-fonts-grids.css");/*TODO: yui hosted url*/
 
 body {
-  background-color: #eee;
+  background-color: #ccc;
 }
 
-.em {
-  font-weight: bold;
-  font-style: italic;
-}
-a:link {
+a {
   text-decoration: none;
 }
 a:visited {
-  color: #7a0285;
-  text-decoration: none;
+}
+a:link {
 }
 a:hover {
-  font-style: italic;
-  text-decoration: none;
 }
 
-#ft a:link,
-#hd a:link {
-  color: #fff;
-}
-#ft a:hover,
-#hd a:hover {
-  color: #7a0285;
-}
-#ft a:visited,
-#hd a:visited {
-  color: #fff;
-}
 #doc4 {
   background-color: #fff;
+  border-top: solid 4px #000;
+  border-bottom: solid 4px #000;
 }
+
 /*-------------- in hd--------------- */
 #hd {
   font-weight: bold;
   text-align: center;
   padding-top: 2em;
   padding-bottom: 2em;
-  background-color: #333;
 }
+
 h1.title {
   color: #fff;
   font-size: 3.6em;
@@ -61,29 +45,10 @@ div.side {
   margin-bottom: 1em;
 }
 
-.friend-connect {
-  border: 1px solid #ccc;
-  margin: 0 .5em;
-}
-
-ul.link {
-  margin-top: 1em;
-  margin-left: 1em;
-}
-
-li.link {
-  font-size: 1.5em;
-  list-style: square;
-  list-style-position: inside;
-}
-
-
 /*---------------in main--------------------*/
 .yui-gc {
   padding-top: 1em;
   padding-bottom: 5em;
-  border-right: solid 1px #999;
-  border-left: solid 1px #ccc;
 }
 
 h3.section {
@@ -96,38 +61,57 @@ h3.section {
 }
 
 /*-----------in list------------------*/
-ul.entry {
+ul.entries {
   margin-left: .5em;
 }
+
 li.entry {
+  font-family: Helvetica;
   color: #333;
-  list-style-image: url("images/entry.png");
-  list-style-position: inside;
+  list-style: none;
+  line-height: 1.4em;
   padding: .8em .6em;
 }
 
-li.entry:hover {
-  background-color: #eef;
+li.entry a:visited {
+  color: #036;
+}
+li.entry a:link {
+  color: #275b8a;
+}
+li.entry a:hover {
+  color: #fff;
+  background-color: #275b8a;
 }
 
-h4.entry {
-  display: inline;
-  font-weight: bold;
-  font-size: 1.2em;
+
+li.entry .time {
+  color: #999;
+  background-color: #ddd;
+  padding: .1em .2em .1em .2em;
 }
-p.entry .title {
-  font-size: 1.2em;
-}
-p.entry {
-  font-family: Georgia;
+li.entry .time:after {
 }
 
-.timestamp {
+li.entry .channel:after {
+  content: " >";
+}
+li.entry .author:after {
+  content: " / ";
+}
+li.entry .channel,
+li.entry .author {
   color: #666;
+  font-weight: bold;
 }
 
-img.entry {
+li.entry .title {
+  font-size: 1.2em;
+}
+
+p.entry img {
   max-height: 6em;
+  max-width: 6em;
   float: right;
 }
 
