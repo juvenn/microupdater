@@ -58,3 +58,11 @@ class Featured(db.Model):
   enabled = db.BooleanProperty()
   channel = db.ReferenceProperty(Channel)
   created_at = db.DateTimeProperty(auto_now_add=True)
+
+
+class Release(db.Model):
+  title = db.StringProperty(required=True)
+  release_at = db.DateTimeProperty(required=True)
+  link = db.LinkProperty(required=True)
+  location = db.PostalAddressProperty()
+  created_at = db.DateTimeProperty(auto_now_add=True)

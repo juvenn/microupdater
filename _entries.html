@@ -1,6 +1,8 @@
       {% regroup entries by pub_date as grouped %}
       {% for g in grouped %}
-        <div class="separator">{{g.grouper|date:"l, d N"}}</div>
+      <h3 class="section">
+	<span>{{g.grouper|date:"l, d N"}}</span>
+      </h3>
 	  <ul class="entries">
 	    {% for e in g.list %}
 	    <li class="entry">
@@ -11,12 +13,12 @@
 	        <span class="title">
 	          <a href="{{e.link}}">{{e.title|truncatewords:10}}</a>
 	        </span>
-		<span class="summary">{{e.summary|striptags|truncatewords:50}}</span>
+		<span class="summary">{{e.summary|striptags|truncatewords:40}}</span>
 	      </p>
 	    <div class="meta">
 	      <span class="time">{{e.published|time:"h:i A"}}</span>
 	      {% if e.author %}
-	      <span class="author">By {{e.author}}</span>
+	     - BY <span class="author">{{e.author}}</span>
 	      {% endif %}
 	    </div>
 	    </li>

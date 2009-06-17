@@ -1,5 +1,26 @@
 <!--Section Release-->
-<div class="section">
-  <h3 class="section">{{ex.title}} &copy; {{ex.producer}} </h3>
-  <p>{{ex.description}}</P>
-</div>
+<h3 class="section">
+  <span>Next Release</span>
+</h3>
+  <ul class="rls">
+    {% for r in rls %}
+    <li class="release">
+    <span class="date">{{ r.release_at|date:"" }}</span>
+    <a href="{{r.link}}">{{ r.title }}</a>
+    {% if r.location %}
+    @ <span class="location">r.location</span>
+    {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <div id="twitter">
+      <img src="/static/images/twitter.png">
+    <span>
+      BroadCast Yours
+    </span>
+    <p class="tweet">
+    @<a href="http://twitter.com/microupdater">microupdater</a>
+    YOUR PRODUCT MILESTONE will be released on DATE TIMEZONE,
+    LOCATION LINK
+    </p>
+  </div>
