@@ -125,6 +125,9 @@ li.entry .channel:after {
   content: " / "
 }
 
+li.entry .meta {
+  font-size: .86em;
+}
 li.entry .meta .author {
   text-transform: capitalize;
 }
@@ -137,6 +140,12 @@ p.entry img {
 }
 
 /*-------------in #side---------------------*/
+
+#iCal {
+  width: 268px;
+  height: 280px;
+  border: 0;
+}
 
 #twitter {
   margin-top: 1em;
@@ -152,11 +161,29 @@ p.entry img {
 
 #twitter p.tweet {
   color: #666;
-  padding: .2em;
+  padding: .5em 1em;
   border: solid 1px #ccc;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
   background-color: #eef;
 }
 
+#sponsor {
+  border: solid 1px #ddd;
+  background-color: #eef;
+}
+
+#sponsor h3 {
+  font-size: 1.2em;
+  border-bottom: solid 1px #ddd;
+  margin-top: .5em;
+}
+#sponsor h3 span{
+  background-color: #eef;
+  top: 0;
+  left: 1em;
+}
 
 /*-------------in ft---------------------*/
 #ft {

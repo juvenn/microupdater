@@ -29,7 +29,7 @@ class Entry(db.Model):
   author = db.StringProperty()
   title = db.StringProperty(required=True)
   link = db.LinkProperty(required=True)
-  summary = db.TextProperty(required=True)
+  summary = db.TextProperty()
   published = db.DateTimeProperty(required=True)
   reader_id = db.StringProperty(required=True)
   channel = db.ReferenceProperty(Channel,required=True)

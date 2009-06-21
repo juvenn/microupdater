@@ -54,7 +54,7 @@ class MainPage(webapp.RequestHandler):
     cls = [f.channel for f in fs if f.channel]
     entries = []
     for cl in cls:
-      e = cl.entry_set.get()
+      e = cl.entry_set.order("-published").get()
       if e: entries.append(e)
     path = self.build_path("_sponsors.html")
     return template.render(path, {"entries":entries})
