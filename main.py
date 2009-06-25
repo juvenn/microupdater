@@ -14,7 +14,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import memcache
-from mudel import Entry, Channel, Featured, Release
+from mudel import Entry, Channel, Featured
 
 class MainPage(webapp.RequestHandler):
   def get(self):
@@ -25,19 +25,16 @@ class MainPage(webapp.RequestHandler):
   def get_sections(self):
     sec = memcache.get_multi(
 	["entries",
-	 "sponsors",
-	 "release"],
+	 "sponsors"],
 	key_prefix="sec_")
     if not sec.get("entries"):
       sec["entries"] = self.render_sec_entries()
     if not sec.get("sponsors"):
       sec["sponsors"] = self.render_sec_sponsors()
-    if not sec.get("release"):
-      sec["release"] = self.render_sec_release()
-    if memcache.add_multi(sec, key_prefix="sec_"):
+    if memcache.set_multi(sec, key_prefix="sec_"):
       # Failed to cache some keys. Note that add_multi will
       # return list of keys which FAILED to cache. Ref SDK doc
-      logging.warning("memcache.add_multi() not succeded.")
+      logging.warning("memcache.set_multi() not succeeded.")
     return sec
 
   def render_sec_entries(self):
@@ -58,14 +55,6 @@ class MainPage(webapp.RequestHandler):
       if e: entries.append(e)
     path = self.build_path("_sponsors.html")
     return template.render(path, {"entries":entries})
-
-  def render_sec_release(self):
-    q1 = Release.all().order("-release_at")
-    q2 = q1.filter("release_at >=", datetime.utcnow())
-    rls = q2.fetch(5)
-    path = self.build_path("_release.html")
-    return template.render(path, {"rls":rls})
-    
 
   def build_path(self, path):
     return os.path.join(os.path.dirname(__file__), path)

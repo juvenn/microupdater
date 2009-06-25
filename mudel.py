@@ -17,6 +17,7 @@ class Channel(db.Model):
   reader_id = db.StringProperty(required=True)
 
   blog = db.LinkProperty(required=True)
+  status = db.LinkProperty()
   twitter = db.StringProperty()
   friendfeed = db.StringProperty()
 
@@ -60,9 +61,3 @@ class Featured(db.Model):
   created_at = db.DateTimeProperty(auto_now_add=True)
 
 
-class Release(db.Model):
-  title = db.StringProperty(required=True)
-  release_at = db.DateTimeProperty(required=True)
-  link = db.LinkProperty(required=True)
-  location = db.PostalAddressProperty()
-  created_at = db.DateTimeProperty(auto_now_add=True)

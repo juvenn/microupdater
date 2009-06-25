@@ -132,16 +132,27 @@ li.entry .meta .author {
   text-transform: capitalize;
 }
 
-
 p.entry img {
   max-height: 6em;
   max-width: 6em;
   float: right;
 }
 
+.meta span.connections {
+  padding: 0 .2em;
+  outline: solid 1px #ccc;
+  background-color: #eef;
+}
+.meta span.connections:hover {
+  outline: solid 1px #999;
+}
+span.connections a:hover {
+  text-decoration: none;
+}
 /*-------------in #side---------------------*/
 
 #iCal {
+  color: #666;
   width: 268px;
   height: 280px;
   border: 0;

@@ -20,6 +20,21 @@
 	      {% if e.author %}
 	     - BY <span class="author">{{e.author}}</span>
 	      {% endif %}
+	      {% if e.channel.status %}
+	      - <span class="connections">
+		<a href="{{e.channel.status}}">Status</a>
+	      </span>
+	      {% endif %}
+	      {% if e.channel.twitter %}
+	      - <span class="connections">
+		<a href="http://twitter.com/{{e.channel.twitter}}/">Twitter</a>
+	      </span>
+	      {% endif %}
+	      {% if e.channel.friendfeed %}
+	      - <span class="connections">
+		<a href="http://friendfeed.com/{{e.channel.friendfeed}}">FriendFeed</a>
+	      </span>
+	      {% endif %}
 	    </div>
 	    </li>
 	    {% endfor %}

@@ -7,22 +7,20 @@
 {% endblock main %}
 
 {% block side %}
-  <div id="linkd" class="section">
-    <span>
-      <img src="" />
-      <a href="mail:d2@microupdater.com">Mail</a>
-    </span>
-    <span>
-      <img src="" />
-      <a href="http://twitter.com/microupdater">Twitter</a>
-    </span>
-    <span>
-      <img src="" />
-      <a href="">FriendFeed</a>
-    </span>
-  </div>
   <div class="section">
-  {{ release }}
+<!--Section Release-->
+   <iframe id="iCal" src="http://www.google.com/calendar/embed?title=Next%20Updates&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;mode=AGENDA&amp;height=280&amp;wkst=1&amp;hl=en&amp;bgcolor=%23FFFFFF&amp;src=9octudj0t96utuvobboupu95lc%40group.calendar.google.com&amp;color=%23AB8B00&amp;ctz=Etc%2FGMT"></iframe>
+  <div id="twitter">
+      <img src="/static/images/twitter.png">
+    <span>
+      Add Your Release
+    </span>
+    <p class="tweet">
+    @<a href="http://twitter.com/microupdater">microupdater</a>
+    YOUR PRODUCT MILESTONE will be released on DATE TIMEZONE,
+    LOCATION LINK
+    </p>
+  </div>
   </div>
   <div id="sponsor" class="section">
   {{ sponsors }}
