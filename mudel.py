@@ -39,13 +39,13 @@ class Entry(db.Model):
   def pub_date(self):
     return self.published.date()
 
-  @classmethod
+  @staticmethod
   def cleanup(days=30):
     """Cleanup datastore.
     Cleaup by delete old entries, default to published 30 days ago
     """
     outdate = datetime.utcnow() - timedelta(days)
-    entry_query = Entry.all.order("published").filter("published <=",outdate)
+    entry_query = Entry.all().order("published").filter("published <=",outdate)
     entries = entry_query.fetch(100)
     db.delete(entries)
     logging.info("Entries published before %s were succeesfully deleted." %
