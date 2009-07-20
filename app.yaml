@@ -12,6 +12,10 @@ handlers:
   static_files: static/images/favicon.png
   upload: static/images/favicon.png
 
+- url: /adsense.txt
+  static_files: static/adsense.txt
+  upload: static/adsense.txt
+
 - url: /static
   static_dir: static
 
