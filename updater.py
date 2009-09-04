@@ -100,16 +100,20 @@ class Updater(db.Model):
       False, if not.
     """
     if not entries: return False
-    entities = []
+    entries_to_put = []
+    channels_to_put = []
     for e in entries:
       if Entry.all().filter("reader_id =", e.id).get(): break
       chnl = Channel.all().filter("reader_id =", e.source.id).get()
       if not chnl:
+	fo
 	src_title = e.source.title.split(" - ")[0]
-	chnl = Channel(title=src_title,
+	chnl = Channel(key_name=e.source.id,
+	               title=src_title,
 		       blog=e.source.link,
 		       reader_id=e.source.id)
-	chnl.put()
+	chnl_key = db.Key.from_path('Channel', e.source.id)
+	channels_to_put.append(chnl)
       if e.has_key("content"): content = e.content[0].value
       else: content = e.summary
       t = e.published_parsed
@@ -121,7 +125,7 @@ class Updater(db.Model):
 	          author=e.author,
 	          published=pub_at,
 	          reader_id=e.id,
-	          channel=chnl) 
+	          channel=chnl_key) 
       entities.append(ent)
     db.put(entities)
     return True

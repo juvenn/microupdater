@@ -19,11 +19,11 @@ handlers:
 - url: /static
   static_dir: static
 
-- url: /admin/croned
+- url: /croned
   script: croned.py
   login: admin
 
-- url: /admin/remote_api
+- url: /79e6
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
 
