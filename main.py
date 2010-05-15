@@ -19,7 +19,7 @@ from mudel import Entry, Channel, Featured
 class MainPage(webapp.RequestHandler):
   def get(self):
     template_values = self.get_sections()
-    path = self.build_path("main.html")
+    path = self.template_path("main.html")
     self.response.out.write(template.render(path,template_values))
 
   def get_sections(self):
@@ -38,11 +38,9 @@ class MainPage(webapp.RequestHandler):
     return sec
 
   def render_sec_entries(self):
-    q1 = Entry.all().order("-published")
-    dt = q1.get().published
-    q2 = q1.filter("published >=", dt-timedelta(2))
-    entries = q2.fetch(25)
-    path = self.build_path("_entries.html")
+    query = Entry.all().order("-published")
+    entries = query.fetch(30)
+    path = self.template_path("_entries.html")
     return template.render(path, {"entries":entries})
 
   def render_sec_sponsors(self):
@@ -53,11 +51,11 @@ class MainPage(webapp.RequestHandler):
     for cl in cls:
       e = cl.entry_set.order("-published").get()
       if e: entries.append(e)
-    path = self.build_path("_sponsors.html")
+    path = self.template_path("_sponsors.html")
     return template.render(path, {"entries":entries})
 
-  def build_path(self, path):
-    return os.path.join(os.path.dirname(__file__), path)
+  def template_path(self, filename):
+    return os.path.join(os.path.dirname(__file__), "template", filename)
 
 
 application = webapp.WSGIApplication([
