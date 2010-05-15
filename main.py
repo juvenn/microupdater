@@ -55,7 +55,7 @@ class MainPage(webapp.RequestHandler):
     return template.render(path, {"entries":entries})
 
   def template_path(self, filename):
-    return os.path.join(os.path.dirname(__file__), "template", filename)
+    return os.path.join(os.path.dirname(__file__), "templates", filename)
 
 
 application = webapp.WSGIApplication([
