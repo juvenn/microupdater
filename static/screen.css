@@ -35,9 +35,6 @@ h1.title a:hover {
   border-top: solid 5px #000;
 }
 
-.time:after {
-  content: " UTC";
-}
 .time {
   color: #d69300;
 }

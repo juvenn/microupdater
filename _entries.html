@@ -16,7 +16,7 @@
 		<span class="summary">{{e.summary|striptags|truncatewords:40}}</span>
 	      </p>
 	    <div class="meta">
-	      <span class="time">{{e.published|time:"h:i A"}}</span>
+	      <span class="time">{{e.published|timesince}} ago</span>
 	      {% if e.author %}
 	     - BY <span class="author">{{e.author}}</span>
 	      {% endif %}
