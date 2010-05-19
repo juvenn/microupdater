@@ -126,7 +126,7 @@ li.entry .meta {
   font-size: .86em;
 }
 li.entry .meta .author {
-  text-transform: capitalize;
+  font-weight: bold;
 }
 
 p.entry img {
