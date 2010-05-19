@@ -35,13 +35,6 @@ class MainPage(webapp.RequestHandler):
     featured_channels = query.fetch(6)
     entries = [ch.latest_entry for ch in featured_channels
 	if ch.latest_entry]
-    # f_query = Featured.all().filter("enabled =", True)
-    # fs = f_query.fetch(6)
-    # cls = [f.channel for f in fs if f.channel]
-    # entries = []
-    # for cl in cls:
-    #   e = cl.entry_set.order("-published").get()
-    #   if e: entries.append(e)
     path = self.template("_sponsors.html")
     return template.render(path, {"entries":entries})
 
