@@ -1,8 +1,9 @@
 cron:
-- description: remote data sync
-  url: /admin/croned?action=sync
-  schedule: every 10 minutes
-
 - description: cleanup old dated entries
   url: /admin/croned?action=cleanup
   schedule: every monday 00:00
+
+# Deprecated long polling
+# - description: remote data sync
+#   url: /admin/croned?action=sync
+#   schedule: every 10 minutes
