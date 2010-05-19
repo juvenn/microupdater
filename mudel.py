@@ -12,11 +12,11 @@ from google.appengine.ext import db
 
 class Channel(db.Model):
   title = db.StringProperty(required=True)
-  logo = db.LinkProperty(default=None)
-  created_at = db.DateTimeProperty(auto_now_add=True)
-  reader_id = db.StringProperty(required=True)
-
   blog = db.LinkProperty(required=True)
+  created_at = db.DateTimeProperty(auto_now_add=True)
+  featured = db.BooleanProperty(default=False)
+  logo = db.LinkProperty()
+
   status = db.LinkProperty()
   twitter = db.StringProperty()
   friendfeed = db.StringProperty()
@@ -32,7 +32,6 @@ class Entry(db.Model):
   link = db.LinkProperty(required=True)
   summary = db.TextProperty()
   published = db.DateTimeProperty(required=True)
-  reader_id = db.StringProperty(required=True)
   channel = db.ReferenceProperty(Channel,required=True)
 
   @property
@@ -51,6 +50,8 @@ class Entry(db.Model):
     logging.info("Entries published before %s were succeesfully deleted." %
 	outdate.isoformat())
 
+
+# Deprecated model
 class Featured(db.Model):
   title = db.StringProperty()
   start = db.DateTimeProperty()
