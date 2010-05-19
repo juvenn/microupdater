@@ -4,7 +4,7 @@
 
 
 body {
-  font-family: sans-serif;
+  font-family: "Lucida Grande", "Droid Sans", sans-serif;
   background-color: #ccc;
 }
 
@@ -64,7 +64,7 @@ h1.title {
 
 h2.subtitle {
   color: #666;
-  font-family: Lucida;
+  font-family: Symbol;
   text-transform: uppercase;
   font-size: 2.4em;
   padding-top: .2em;
