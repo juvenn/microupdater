@@ -7,7 +7,9 @@
 """Data Model"""
 
 import logging
+import urllib
 from datetime import datetime, timedelta
+from google.appengine.api import urlfetch
 from google.appengine.ext import db
 
 class Channel(db.Model):
@@ -21,9 +23,11 @@ class Channel(db.Model):
   created = db.DateTimeProperty(auto_now_add=True)
   featured = db.BooleanProperty(default=False)
   logo = db.LinkProperty(required=True)
-  # Subscribe status
+  # Subscribe status: 
+  # `None` will keep channel off normal automatic sub/unsub cycle.
   status = db.StringProperty(default="unsubscribed",
-      choices = ["subscribing",
+      choices = [None, 
+	         "subscribing",
 	         "subscribed",
 		 "unsubscribing",
 		 "unsubscribed"])
@@ -36,6 +40,52 @@ class Channel(db.Model):
     q = self.entry_set.order("-updated")
     return q.get()
     
+  def subscribe(self):
+    self.status = "subscribing"
+    self.command("subscribe")
+    self.put()
+
+  def unsubscribe(self):
+    self.status = "unsubscribing"
+    self.command("unsubscribe")
+    self.put()
+
+  def command(self, action):
+    params = {
+	"hub.mode": action,
+	"hub.topic": self.topic,
+	"hub.verify": "async",
+	"hub.callback": "/subbub/" + self.key(),
+	"hub.verify_token": TOKEN
+	}
+    data = urllib.urlencode(params)
+    authcode = base64.urlsafe_b64encode(":".join([USER,PASSWORD]))
+    headers={"Authorization": "Basic " + authcode,
+	     "Content-Type": "application/x-www-form-urlencoded"}
+    try:
+      re = urlfetch.fetch(url=HUB,
+	  payload=data,
+	  method=urlfetch.POST,
+	  headers=headers
+	  )
+    except Error, e:
+      logging.error("URL fetch %s failed: %s" % (HUB, e))
+      taskqueue.add(url="/subscribe/" + self.key())
+      self.status = "unsubscribed" if action == "subscribe" else "subscribed"
+    # 204 - Already done
+    # 202 - Accepted, wait for verification
+    elif re.status_code == 204:
+      self.status = action + "d"
+    elif re.status_code == 202:
+      logging.info("The request accepted: %s to %s" % 
+	  (action, self.topic))
+    else:
+      logging.warning("Hub %d: %s" % (re.status_code, re.content))
+      taskqueue.add(url="/subscribe/" + self.key())
+      self.status = "unsubscribed" if action == "subscribe" else "subscribed"
+
+
+
 class Entry(db.Model):
   author = db.StringProperty()
   title = db.StringProperty(required=True)
