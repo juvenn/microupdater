@@ -1,4 +1,4 @@
-      {% regroup entries by pub_date as grouped %}
+      {% regroup entries by date as grouped %}
       {% for g in grouped %}
       <h3 class="section">
 	<span>{{g.grouper|date:"l, d N"}}</span>
@@ -8,7 +8,7 @@
 	    <li class="entry">
 	      <p class="entry">
 	      <span class="channel">
-		<a href="{{e.channel.blog}}">{{e.channel.title|truncatewords:5}}</a>
+		<a href="{{e.channel.topic}}">{{e.channel.title|truncatewords:5}}</a>
 	      </span>
 	        <span class="title">
 	          <a href="{{e.link}}">{{e.title|truncatewords:10}}</a>
@@ -16,7 +16,7 @@
 		<span class="summary">{{e.summary|striptags|truncatewords:40}}</span>
 	      </p>
 	    <div class="meta">
-	      <span class="time">{{e.published|timesince}} ago</span>
+	      <span class="time">{{e.updated|timesince}} ago</span>
 	      {% if e.author %}
 	     - BY <span class="author">{{e.author}}</span>
 	      {% endif %}
