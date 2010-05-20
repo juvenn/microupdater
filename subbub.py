@@ -9,7 +9,9 @@ from datetime import datetime
 from google.appengine.api.labs import taskqueue
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext import db
 from model import Entry, Channel
+import feedparser
 
 # PubSubHubbub callback handler
 class PushCallback(webapp.RequestHandler):
