@@ -16,7 +16,7 @@ from google.appengine.api import urlfetch
 # Copyright (c) Mark Pilgrim
 # http://feedparser.org
 import feedparser
-from mudel import Entry, Channel
+from model import Entry, Channel
 
 class Updater(db.Model):
   url = db.LinkProperty(required=True)

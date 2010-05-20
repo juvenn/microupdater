@@ -8,7 +8,7 @@
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import webapp
-from mudel import Entry
+from model import Entry
 
 class CronedHandler(webapp.RequestHandler):
   def get(self):
