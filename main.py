@@ -8,18 +8,18 @@
 
 import os
 import logging
-from datetime import datetime, timedelta, time
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
-from mudel import Entry, Channel, Featured
+from mudel import Entry, Channel
+
 
 class MainPage(webapp.RequestHandler):
   def get(self):
     sec = {}
     query = Entry.all().order("-published")
-    entries = query.fetch(30)
+    entries = query.fetch(25)
     sec["entries"] = self.render_sec_entries(entries)
 
     sec["sponsors"] = self.render_sec_sponsors()
