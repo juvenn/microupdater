@@ -42,13 +42,13 @@ class Entry(db.Model):
   # Entry's unique identifier 
   uid = db.StringProperty(required=True)
   link = db.LinkProperty(required=True)
-  summary = db.TextProperty()
-  published = db.DateTimeProperty(required=True)
+  content = db.TextProperty()
+  updated = db.DateTimeProperty(required=True)
   channel = db.ReferenceProperty(Channel,required=True)
 
   @property
-  def pub_date(self):
-    return self.published.date()
+  def date(self):
+    return self.updated.date()
 
   @staticmethod
   def cleanup(days=30):
