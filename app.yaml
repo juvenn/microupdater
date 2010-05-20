@@ -19,7 +19,7 @@ handlers:
 - url: /static
   static_dir: static
 
-- url: /croned
+- url: /admin/croned
   script: croned.py
   login: admin
 
