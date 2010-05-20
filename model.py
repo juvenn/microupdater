@@ -63,13 +63,3 @@ class Entry(db.Model):
 	outdate.isoformat())
 
 
-# Deprecated model
-class Featured(db.Model):
-  title = db.StringProperty()
-  start = db.DateTimeProperty()
-  end = db.DateTimeProperty()
-  enabled = db.BooleanProperty()
-  channel = db.ReferenceProperty(Channel)
-  created_at = db.DateTimeProperty(auto_now_add=True)
-
-
