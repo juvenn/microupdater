@@ -15,11 +15,13 @@ class Channel(db.Model):
   TOKEN = "SSBMb3ZlIFlvdSwgSm91bGUK" 
 
   title = db.StringProperty(required=True)
-  blog = db.LinkProperty(required=True)
+  topic = db.LinkProperty(required=True)
+  # Feed's unique identifier
+  uid = db.StringProperty(required=True)
   created_at = db.DateTimeProperty(auto_now_add=True)
   featured = db.BooleanProperty(default=False)
   logo = db.LinkProperty(required=True)
-  #subscribe status
+  # Subscribe status
   status = db.StringProperty(default="unsubscribed",
       choices = ["subscribing",
 	         "subscribed",
@@ -37,6 +39,8 @@ class Channel(db.Model):
 class Entry(db.Model):
   author = db.StringProperty()
   title = db.StringProperty(required=True)
+  # Entry's unique identifier 
+  uid = db.StringProperty(required=True)
   link = db.LinkProperty(required=True)
   summary = db.TextProperty()
   published = db.DateTimeProperty(required=True)
