@@ -18,7 +18,7 @@ class Channel(db.Model):
   topic = db.LinkProperty(required=True)
   # Feed's unique identifier
   uid = db.StringProperty(required=True)
-  created_at = db.DateTimeProperty(auto_now_add=True)
+  created = db.DateTimeProperty(auto_now_add=True)
   featured = db.BooleanProperty(default=False)
   logo = db.LinkProperty(required=True)
   # Subscribe status
@@ -33,7 +33,7 @@ class Channel(db.Model):
 
   @property
   def latest_entry(self):
-    q = self.entry_set.order("-published")
+    q = self.entry_set.order("-updated")
     return q.get()
     
 class Entry(db.Model):
@@ -53,13 +53,13 @@ class Entry(db.Model):
   @staticmethod
   def cleanup(days=30):
     """Cleanup datastore.
-    Cleaup by delete old entries, default to published 30 days ago
+    Cleaup by delete old entries, default to updated 30 days ago
     """
     outdate = datetime.utcnow() - timedelta(days)
-    entry_query = Entry.all().order("published").filter("published <=",outdate)
+    entry_query = Entry.all().order("updated").filter("updated <=",outdate)
     entries = entry_query.fetch(100)
     db.delete(entries)
-    logging.info("Entries published before %s were succeesfully deleted." %
+    logging.info("Entries updated before %s were succeesfully deleted." %
 	outdate.isoformat())
 
 

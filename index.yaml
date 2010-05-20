@@ -13,5 +13,5 @@ indexes:
 - kind: Entry
   properties:
   - name: channel
-  - name: published
+  - name: updated
     direction: desc

@@ -18,7 +18,7 @@ from mudel import Entry, Channel
 class MainPage(webapp.RequestHandler):
   def get(self):
     sec = {}
-    query = Entry.all().order("-published")
+    query = Entry.all().order("-updated")
     entries = query.fetch(25)
     sec["entries"] = self.render_sec_entries(entries)
 
