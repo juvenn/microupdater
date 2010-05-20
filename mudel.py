@@ -11,13 +11,21 @@ from datetime import datetime, timedelta
 from google.appengine.ext import db
 
 class Channel(db.Model):
+  # Class constant. PuSH verify_token 
+  TOKEN = "SSBMb3ZlIFlvdSwgSm91bGUK" 
+
   title = db.StringProperty(required=True)
   blog = db.LinkProperty(required=True)
   created_at = db.DateTimeProperty(auto_now_add=True)
   featured = db.BooleanProperty(default=False)
-  logo = db.LinkProperty()
+  logo = db.LinkProperty(required=True)
+  #subscribe status
+  status = db.StringProperty(default="unsubscribed",
+      choices = ["subscribing",
+	         "subscribed",
+		 "unsubscribing",
+		 "unsubscribed"])
 
-  status = db.LinkProperty()
   twitter = db.StringProperty()
   friendfeed = db.StringProperty()
 
