@@ -24,10 +24,8 @@ class Channel(db.Model):
   featured = db.BooleanProperty(default=False)
   logo = db.LinkProperty(required=True)
   # Subscribe status: 
-  # `None` will keep channel off normal automatic sub/unsub cycle.
   status = db.StringProperty(default="unsubscribed",
-      choices = [None, 
-	         "subscribing",
+      choices = ["subscribing",
 	         "subscribed",
 		 "unsubscribing",
 		 "unsubscribed"])
