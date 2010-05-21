@@ -24,8 +24,9 @@ class Channel(db.Model):
   featured = db.BooleanProperty(default=False)
   logo = db.LinkProperty(required=True)
   # Subscribe status: 
-  status = db.StringProperty(default="unsubscribed",
-      choices = ["subscribing",
+  status = db.StringProperty(default=None,
+      choices = [None,
+	         "subscribing",
 	         "subscribed",
 		 "unsubscribing",
 		 "unsubscribed"])
