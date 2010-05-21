@@ -3,7 +3,7 @@ cron:
   url: /admin/croned?action=cleanup
   schedule: every monday 00:00
 
-# Deprecated long polling
-# - description: remote data sync
-#   url: /admin/croned?action=sync
-#   schedule: every 10 minutes
+- description: periodically confirm subscription status
+  url: /admin/croned?action=subscribe
+  schedule: every 5 minutes
+

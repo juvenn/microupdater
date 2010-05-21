@@ -51,12 +51,10 @@ class Channel(db.Model):
   def subscribe(self):
     self.status = "subscribing"
     self.command("subscribe")
-    self.put()
 
   def unsubscribe(self):
     self.status = "unsubscribing"
     self.command("unsubscribe")
-    self.put()
 
   def command(self, action):
     params = {
@@ -94,6 +92,7 @@ class Channel(db.Model):
       taskqueue.add("hub.mode="+action,
 	            url=WORKER.subscriber+self.key())
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
+    self.put()
 
 
 

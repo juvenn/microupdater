@@ -8,13 +8,23 @@
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import webapp
-from model import Entry
+from model import Entry, Channel
 
 class CronedHandler(webapp.RequestHandler):
   def get(self):
     action = self.request.get("action")
     if action == "cleanup":
       Entry.cleanup()
+    elif action == "subscribe":
+      # Periodically reconfirm the subscription is active
+      #
+      # Priorily subscribe to newly added channel (i.e. status = None);
+      # if there aren't any, then confirm the least checked subscription.
+      ch = Channel.all().filter("status =", None).get()
+      if not ch:
+	ch = Channel.all().filter("status =",
+	            "subscribed").order("lastcheck").get()
+      ch.subscribe()
     else: self.error(403) # access denied
 
 application = webapp.WSGIApplication([
