@@ -10,12 +10,12 @@ import logging
 import urllib
 from datetime import datetime, timedelta
 from google.appengine.api import urlfetch
+from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
+# import configs
+from sub import WORKER, HUB
 
 class Channel(db.Model):
-  # Class constant. PuSH verify_token 
-  TOKEN = "SSBMb3ZlIFlvdSwgSm91bGUK" 
-
   title = db.StringProperty(required=True)
   topic = db.LinkProperty(required=True)
   # Feed's unique identifier
@@ -55,22 +55,23 @@ class Channel(db.Model):
 	"hub.mode": action,
 	"hub.topic": self.topic,
 	"hub.verify": "async",
-	"hub.callback": "/subbub/" + self.key(),
-	"hub.verify_token": TOKEN
+	"hub.callback": WORKER.subbub + self.key(),
+	"hub.verify_token": HUB.token
 	}
     data = urllib.urlencode(params)
-    authcode = base64.urlsafe_b64encode(":".join([USER,PASSWORD]))
-    headers={"Authorization": "Basic " + authcode,
-	     "Content-Type": "application/x-www-form-urlencoded"}
+    headers={"Content-Type": "application/x-www-form-urlencoded"}
+    if HUB.get("auth"):
+      authcode = base64.urlsafe_b64encode(":".join(HUB.auth))
+      headers["Authorization"] = "Basic " + authcode
     try:
-      re = urlfetch.fetch(url=HUB,
+      re = urlfetch.fetch(url=HUB.url,
 	  payload=data,
 	  method=urlfetch.POST,
 	  headers=headers
 	  )
     except Error, e:
-      logging.error("URL fetch %s failed: %s" % (HUB, e))
-      taskqueue.add(url="/subscribe/" + self.key())
+      logging.error("URL fetch %s failed: %s" % (HUB.url, e))
+      taskqueue.add(url = WORKER.subscriber + self.key())
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
     # 204 - Already done
     # 202 - Accepted, wait for verification
@@ -81,7 +82,7 @@ class Channel(db.Model):
 	  (action, self.topic))
     else:
       logging.warning("Hub %d: %s" % (re.status_code, re.content))
-      taskqueue.add(url="/subscribe/" + self.key())
+      taskqueue.add(url = WORKER.subscriber + self.key())
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
 
 

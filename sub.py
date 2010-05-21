@@ -13,11 +13,24 @@ from google.appengine.ext import db
 from model import Entry, Channel
 import feedparser
 
+# URL end points
+WORKER = {
+    "subbub": "/worker/subbub/", # PubSubHubbub callback
+    "parser": "/worker/parse/",
+    "subscriber": "/worker/subscribe/"
+    }
+# PuSH hub configs
+HUB = {
+    "url": "http://superfeedr.com/hubbub",
+    "token": "SSBMb3ZlIFlvdSwgSm91bGUK",
+    "auth": ["USER", "PASSWORD"]
+    }
+
 # PubSubHubbub callback handler
 class PushCallback(webapp.RequestHandler):
   # Upon verifications
   #
-  # PuSH verification will come at `/subbub/object_key`
+  # PuSH verification will come at WORKER.subbub + `key`
   #
   # Response:
   # 200: hub.challenge  
@@ -33,15 +46,15 @@ class PushCallback(webapp.RequestHandler):
     logging.info("Upon verifycation: %s from %s" % 
 	(self.request.url, self.request.remote_addr))
     token = self.request.get("hub.verify_token")
-    if token != Channel.TOKEN:
+    if token != HUB.token:
       # Unauthorized, token not match
       self.error(401)
       logging.error("Token not match: %s from %s" % 
 	  (self.request.url, self.request.remote_addr))
       return # fail fast
 
-    # path = "/subbub/key"
-    key = self.request.path[8:] 
+    # path = WORKER.subbub + "key"
+    key = self.request.path[len(WORKER.subbub):] 
     try:
       channel = Channel.get(key)
     except KindError:
@@ -68,9 +81,9 @@ class PushCallback(webapp.RequestHandler):
   def post(self):
     type = self.request.headers["Content-Type"]
     if type == "application/atom+xml" or type == "application/rss+xml":
-      key = self.request.path[8:]
+      key = self.request.path[len(WORKER.subbub):]
       taskqueue.add(self.request.body.decode("utf-8"),
-		    url="/parse/" + key,
+		    url=WORKER.parser + key,
 		    headers={"Content-Type": type})
       self.response.set_status(200)
       logging.info("Upon notifications: %s from %s" % 
@@ -102,8 +115,8 @@ class ParseWorker(webapp.RequestHandler):
         logging.info('Body segment with error: %r', segment.decode('utf-8'))
       return # fail fast
 
-    # `/parse/key`
-    key = self.request.path[7:]
+    # WORKER.parser + `key`
+    key = self.request.path[len(WORKER.parser):]
     # Try to get the channel by key;
     # fallback to feed id, if not found;
     # and at last we'll resort to entry source id,
@@ -153,8 +166,9 @@ class ParseWorker(webapp.RequestHandler):
 
 
 application = webapp.WSGIApplication([
-  ("/subbub/*", PushCallback),
-  ("/parse/*", ParseWorker),
+  (WORKER.subbub + "*", PushCallback),
+  (WORKER.parser + "*", ParseWorker),
+  (WORKER.subscriber + "*", SubscribeWorker),
   ])
 
 def main():
