@@ -23,6 +23,8 @@ class Channel(db.Model):
   created = db.DateTimeProperty(auto_now_add=True)
   featured = db.BooleanProperty(default=False)
   logo = db.LinkProperty(required=True)
+  # Last confirming of the subscription
+  lastcheck = db.DateTimeProperty(auto_now=True)
   # Subscribe status: 
   status = db.StringProperty(default=None,
       choices = [None,
@@ -38,6 +40,13 @@ class Channel(db.Model):
   def latest_entry(self):
     q = self.entry_set.order("-updated")
     return q.get()
+
+  # Last update time of the channel,
+  # seed on 2010-05-27 if not updated.
+  @property
+  def updated(self):
+    entry = self.latest_entry()
+    return entry.updated if entry else datetime(2010, 5, 27)
     
   def subscribe(self):
     self.status = "subscribing"
