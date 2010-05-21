@@ -165,6 +165,31 @@ class ParseWorker(webapp.RequestHandler):
     db.put(updates)
 
 
+class SubscribeWorker(webapp.RequestHandler):
+  def get(self):
+    self.error(501)
+
+  def post(self):
+    key = self.request.path[len(WORKER.subscriber):]
+    try:
+      channel = Channel.get(key)
+    except:
+      logging.error("Broken channel key: %s" % self.request.path)
+      self.error(404)
+      return
+
+    action = self.request.get("hub.mode")
+    if not action:
+      logging.error("hub.mode not found in payload: %s from %s" % 
+	  (self.request.body, self.request.url))
+      self.error(404)
+    if channel:
+      if action == "subscribe": channel.subscribe()
+      else: channel.unsubscribe()
+    else:
+      logging.error("Channel key not found: %s" % self.request.path)
+      self.error(404)
+
 application = webapp.WSGIApplication([
   (WORKER.subbub + "*", PushCallback),
   (WORKER.parser + "*", ParseWorker),

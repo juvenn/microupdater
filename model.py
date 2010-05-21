@@ -71,7 +71,8 @@ class Channel(db.Model):
 	  )
     except Error, e:
       logging.error("URL fetch %s failed: %s" % (HUB.url, e))
-      taskqueue.add(url = WORKER.subscriber + self.key())
+      taskqueue.add("hub.mode="+action,
+	            url=WORKER.subscriber+self.key())
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
     # 204 - Already done
     # 202 - Accepted, wait for verification
@@ -82,7 +83,8 @@ class Channel(db.Model):
 	  (action, self.topic))
     else:
       logging.warning("Hub %d: %s" % (re.status_code, re.content))
-      taskqueue.add(url = WORKER.subscriber + self.key())
+      taskqueue.add("hub.mode="+action,
+	            url=WORKER.subscriber+self.key())
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
 
 
