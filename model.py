@@ -4,7 +4,7 @@
 # http://twitter.com/juvenn
 #
 
-"""Data Model"""
+"""Models"""
 
 import logging
 import urllib
@@ -46,14 +46,23 @@ class Channel(db.Model):
     return entry.updated if entry else datetime(2010, 5, 27)
     
   def subscribe(self):
+    """PuSH subscribe"""
     self.status = "subscribing"
     self.command("subscribe")
 
   def unsubscribe(self):
+    """PuSH unsubscribe"""
     self.status = "unsubscribing"
     self.command("unsubscribe")
 
   def command(self, action):
+    """Issue async commands
+
+    action - `subscribe` or `unsubscribe`.
+
+    Send async command to hub. If failed, the command will be queued
+    for later trying.
+    """
     params = {
 	"hub.mode": action,
 	"hub.topic": self.topic,
@@ -63,6 +72,8 @@ class Channel(db.Model):
 	}
     data = urllib.urlencode(params)
     headers={"Content-Type": "application/x-www-form-urlencoded"}
+
+    # Basic authorization
     if HUB.get("auth"):
       authcode = base64.urlsafe_b64encode(":".join(HUB.auth))
       headers["Authorization"] = "Basic " + authcode
@@ -109,8 +120,9 @@ class Entry(db.Model):
 
   @staticmethod
   def cleanup(days=30):
-    """Cleanup datastore.
-    Cleaup by delete old entries, default to updated 30 days ago
+    """Cleanup entry table.
+
+    Delete older (default >= 30 days) entries
     """
     outdate = datetime.utcnow() - timedelta(days)
     entry_query = Entry.all().order("updated").filter("updated <=",outdate)
