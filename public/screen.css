@@ -136,17 +136,17 @@ p.entry img {
 
 /*-------------in #side---------------------*/
 
-#sponsor {
+#featured {
   border: solid 1px #ddd;
   background-color: #eef;
 }
 
-#sponsor h3 {
+#featured h3 {
   font-size: 1.2em;
   border-bottom: solid 1px #ddd;
   margin-top: .5em;
 }
-#sponsor h3 span{
+#featured h3 span{
   background-color: #eef;
   top: 0;
   left: 1em;
