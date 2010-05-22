@@ -33,9 +33,6 @@ class Channel(db.Model):
 		 "unsubscribing",
 		 "unsubscribed"])
 
-  twitter = db.StringProperty()
-  friendfeed = db.StringProperty()
-
   @property
   def latest_entry(self):
     q = self.entry_set.order("-updated")
