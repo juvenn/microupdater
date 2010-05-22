@@ -4,6 +4,13 @@
 # http://twitter.com/juvenn.
 #
 
+"""PubSubHubbub(PuSH) subscriber
+
+PushCallback - Listening for hub's verification or notification requests
+ParseWorker - Parse queued atom/rss notifications
+SubscribeWorker - Retry queued subscribe/unsubscribe commands
+"""
+
 import logging
 from datetime import datetime
 from google.appengine.api.labs import taskqueue
@@ -26,8 +33,9 @@ HUB = {
     "auth": ["USER", "PASSWORD"]
     }
 
-# PubSubHubbub callback handler
 class PushCallback(webapp.RequestHandler):
+  """PuSH callback handler
+  """
   # Upon verifications
   #
   # PuSH verification will come at WORKER.subbub + `key`
@@ -43,7 +51,8 @@ class PushCallback(webapp.RequestHandler):
   #
   # Please check PubSubHubbub specification for references.
   def get(self):
-    logging.info("Upon verifycation: %s from %s" % 
+    """Handling PuSH verification"""
+    logging.info("Upon verification: %s from %s" % 
 	(self.request.url, self.request.remote_addr))
     token = self.request.get("hub.verify_token")
     if token != HUB.token:
@@ -79,6 +88,10 @@ class PushCallback(webapp.RequestHandler):
 
   # Upon notifications
   def post(self):
+    """Handle PuSH notifications
+
+    Atom/rss feed is queued to `ParseWorker` for later parsing
+    """
     type = self.request.headers["Content-Type"]
     if type == "application/atom+xml" or type == "application/rss+xml":
       key = self.request.path[len(WORKER.subbub):]
@@ -95,10 +108,12 @@ class PushCallback(webapp.RequestHandler):
 
 # Queued tastks of parsing incoming notifications
 class ParseWorker(webapp.RequestHandler):
+  """Worker for queued parsing tasks"""
   def get(self):
     self.error(501)
 
   def post(self):
+    """Parsing queued feeds"""
     doc = feedparser.parse(self.request.body)
 
     # Bozo feed handling
@@ -141,7 +156,7 @@ class ParseWorker(webapp.RequestHandler):
       updated = datetime(t[0],t[1],t[2],t[3],t[4],t[5])
 
       # If we have this entry already in datastore, then the entry is
-      # updated instead of new published. So we update the entity 
+      # updated instead of newly published. So we update the entity 
       # instead of insert a new duplicated entity.
       ent = Entry.all().filter("uid =", e.id).get()
       if not ent:
@@ -170,6 +185,7 @@ class ParseWorker(webapp.RequestHandler):
 
 
 class SubscribeWorker(webapp.RequestHandler):
+  """Worker for queued (un)subscribe tasks"""
   def get(self):
     self.error(501)
 
