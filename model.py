@@ -16,13 +16,13 @@ from google.appengine.ext import db
 from sub import WORKER, HUB
 
 class Channel(db.Model):
-  title = db.StringProperty(required=True)
+  title = db.StringProperty()
   topic = db.LinkProperty(required=True)
   # Feed's unique identifier
-  uid = db.StringProperty(required=True)
+  uid = db.StringProperty()
   created = db.DateTimeProperty(auto_now_add=True)
   featured = db.BooleanProperty(default=False)
-  logo = db.LinkProperty(required=True)
+  logo = db.LinkProperty()
   # Last confirming of the subscription
   lastcheck = db.DateTimeProperty(auto_now=True)
   # Subscribe status: 
