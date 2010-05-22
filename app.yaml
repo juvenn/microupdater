@@ -22,7 +22,7 @@ handlers:
   script: croned.py
   login: admin
 
-- url: /79e6
+- url: /admin/remote
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
 

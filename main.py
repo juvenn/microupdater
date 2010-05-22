@@ -14,23 +14,45 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from model import Entry, Channel
 
+# Entries per page
+PAGESIZE = 25
 
 class MainPage(webapp.RequestHandler):
   """Home page handler"""
+
   def get(self):
-    sec = {}
+    context = {}
     query = Entry.all().order("-updated")
-    entries = query.fetch(25)
-    sec["entries"] = self.render_sec_entries(entries)
+    bookmark = self.request.get("bookmark")
+    if bookmark:
+      dt = datetime.strptime(bookmark, "%Y-%m-%dT%H:%M:%S.%f")
+      entries = query.filter("updated <=",
+	  dt).fetch(PAGESIZE + 1)
+      if len(entries) == PAGESIZE + 1:
+	context["bookmark"] = entries[-1].updated.isoformat("T")
+      else:
+	context["bookmark"] = None
+      context["entries"] = entries[:PAGESIZE]
+      self.response.out.write(self.render_sec_entries(context))
+      return
+    else:
+      sec = {}
+      entries = query.fetch(PAGESIZE + 1)
+      if len(entries) == PAGESIZE + 1:
+	context["bookmark"] = entries[-1].updated.isoformat("T")
+      else:
+	context["bookmark"] = None
+      context["entries"] = entries[:PAGESIZE]
+      sec["entries"] = self.render_sec_entries(context)
 
-    sec["featured"] = self.render_sec_featured()
-    path = self.template("main.html")
-    self.response.out.write(template.render(path, sec))
+      sec["featured"] = self.render_sec_featured()
+      path = self.template("main.html")
+      self.response.out.write(template.render(path, sec))
 
-  def render_sec_entries(self, entries):
+  def render_sec_entries(self, context):
     """Render entries section"""
     path = self.template("_entries.html")
-    return template.render(path, {"entries":entries})
+    return template.render(path, context)
 
   def render_sec_featured(self):
     """Render featured section"""
@@ -50,7 +72,7 @@ class MainPage(webapp.RequestHandler):
 
 
 application = webapp.WSGIApplication([
-  ("/*", MainPage),
+  ("/", MainPage),
   ])
 
 def main():

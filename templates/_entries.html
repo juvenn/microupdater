@@ -25,3 +25,7 @@
 	    {% endfor %}
 	  </ul>
       {% endfor %}
+
+      {% if bookmark %}
+      <a id="bookmark" href="/?bookmark={{bookmark}}">MORE</a>
+      {% endif %}
