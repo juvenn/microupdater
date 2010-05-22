@@ -4,7 +4,7 @@
 # http://twitter.com/juvenn
 #
 
-"""Main Page Handler"""
+"""Page handlers"""
 
 import os
 import logging
@@ -16,29 +16,36 @@ from model import Entry, Channel
 
 
 class MainPage(webapp.RequestHandler):
+  """Home page handler"""
   def get(self):
     sec = {}
     query = Entry.all().order("-updated")
     entries = query.fetch(25)
     sec["entries"] = self.render_sec_entries(entries)
 
-    sec["sponsors"] = self.render_sec_sponsors()
+    sec["featured"] = self.render_sec_featured()
     path = self.template("main.html")
     self.response.out.write(template.render(path, sec))
 
   def render_sec_entries(self, entries):
+    """Render entries section"""
     path = self.template("_entries.html")
     return template.render(path, {"entries":entries})
 
-  def render_sec_sponsors(self):
+  def render_sec_featured(self):
+    """Render featured section"""
     query = Channel.all().filter("featured =", True)
     featured_channels = query.fetch(6)
     entries = [ch.latest_entry for ch in featured_channels
 	if ch.latest_entry]
-    path = self.template("_sponsors.html")
+    path = self.template("_featured.html")
     return template.render(path, {"entries":entries})
 
   def template(self, filename):
+    """Build template path
+
+    templates directory default to `./templates/`
+    """
     return os.path.join(os.path.dirname(__file__), "templates", filename)
 
 
