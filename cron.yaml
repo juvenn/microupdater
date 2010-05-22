@@ -1,9 +1,9 @@
 cron:
 - description: cleanup old dated entries
-  url: /admin/croned?action=cleanup
+  url: /admin/croned?task=cleanup
   schedule: every monday 00:00
 
-- description: periodically confirm subscription status
-  url: /admin/croned?action=subscribe
+- description: periodically confirm subscription is still active
+  url: /admin/croned?task=subscribe
   schedule: every 5 minutes
 

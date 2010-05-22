@@ -4,18 +4,19 @@
 # http://twitter.com/juvenn.
 #
 
-"""Handling Cron-ed Jobs"""
+"""Handling scheduled tasks"""
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import webapp
 from model import Entry, Channel
 
 class CronedHandler(webapp.RequestHandler):
+  """Tasks handler"""
   def get(self):
-    action = self.request.get("action")
-    if action == "cleanup":
+    task = self.request.get("task")
+    if task == "cleanup":
       Entry.cleanup()
-    elif action == "subscribe":
+    elif task == "subscribe":
       # Periodically reconfirm the subscription is active
       #
       # Priorily subscribe to newly added channel (i.e. status = None);
