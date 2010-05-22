@@ -11,22 +11,23 @@ from google.appengine.ext import webapp
 from model import Entry, Channel
 
 class CronedHandler(webapp.RequestHandler):
-  """Tasks handler"""
+  """Task handler"""
   def get(self):
     task = self.request.get("task")
     if task == "cleanup":
+      # Remove obsolete entries
       Entry.cleanup()
     elif task == "subscribe":
-      # Periodically reconfirm the subscription is active
+      # Periodically make subscribe request
       #
-      # Priorily subscribe to newly added channel (i.e. status = None);
+      # Priorily subscribe to newly added channel (i.e. status == None);
       # if there aren't any, then confirm the least checked subscription.
       ch = Channel.all().filter("status =", None).get()
       if not ch:
 	ch = Channel.all().filter("status =",
 	            "subscribed").order("lastcheck").get()
       ch.subscribe()
-    else: self.error(403) # access denied
+    else: self.error(404)
 
 application = webapp.WSGIApplication([
   ("/admin/croned*", CronedHandler),
