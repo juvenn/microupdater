@@ -122,11 +122,15 @@ class ParseWorker(webapp.RequestHandler):
     # and at last we'll resort to entry source id,
     # to find out the associated channel
     channel = None
+    uid = doc.feed.id
     try:
       channel = Channel.get(key)
     except:
-      uid = doc.feed.id
       channel = Channel.all().filter("uid =", uid).get()
+    elif channel and not channel.uid:
+      channel.title = doc.feed.title.split(" - ")[0] 
+      channel.uid = uid
+      channel.put()
 
     updates = []
     for e in doc.entries:
