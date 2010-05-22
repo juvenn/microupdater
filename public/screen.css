@@ -57,7 +57,7 @@ h1.title a:hover {
 h1.title {
   font-family: Impact, sans-serif;
   font-size: 44px;
-  background-image: url("/static/images/color-bar.png");
+  background-image: url("/media/images/color-bar.png");
   background-position: bottom left;
   background-repeat: no-repeat;
 }
@@ -134,47 +134,7 @@ p.entry img {
   float: right;
 }
 
-.meta span.connections {
-  padding: 0 .2em;
-  outline: solid 1px #ccc;
-  background-color: #eef;
-}
-.meta span.connections:hover {
-  outline: solid 1px #999;
-}
-span.connections a:hover {
-  text-decoration: none;
-}
 /*-------------in #side---------------------*/
-
-#iCal {
-  color: #666;
-  width: 268px;
-  height: 280px;
-  border: 0;
-}
-
-#twitter {
-  margin-top: 1em;
-}
-
-#twitter span {
-  color: #d69300;
-  font-size: 1.2em;
-  position: relative;
-  top: -.8em;
-  left: 1em;
-}
-
-#twitter p.tweet {
-  color: #666;
-  padding: .5em 1em;
-  border: solid 1px #ccc;
-  border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  background-color: #eef;
-}
 
 #sponsor {
   border: solid 1px #ddd;
