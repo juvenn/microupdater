@@ -17,21 +17,9 @@ from google.appengine.api.labs import taskqueue
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
-from model import Entry, Channel
+from model import Entry, Channel, WORKER, HUB
 import feedparser
 
-# URL end points
-WORKER = {
-    "subbub": "/worker/subbub/", # PubSubHubbub callback
-    "parser": "/worker/parse/",
-    "subscriber": "/worker/subscribe/"
-    }
-# PuSH hub configs
-HUB = {
-    "url": "http://superfeedr.com/hubbub",
-    "token": "SSBMb3ZlIFlvdSwgSm91bGUK",
-    "auth": ["USER", "PASSWORD"]
-    }
 
 class PushCallback(webapp.RequestHandler):
   """PuSH callback handler

@@ -12,8 +12,19 @@ from datetime import datetime, timedelta
 from google.appengine.api import urlfetch
 from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
-# import configs
-from sub import WORKER, HUB
+
+# URL end points
+WORKER = {
+    "subbub": "/worker/subbub/", # PubSubHubbub callback
+    "parser": "/worker/parse/",
+    "subscriber": "/worker/subscribe/"
+    }
+# PuSH hub configs
+HUB = {
+    "url": "http://superfeedr.com/hubbub",
+    "token": "SSBMb3ZlIFlvdSwgSm91bGUK",
+    "auth": ["USER", "PASSWORD"]
+    }
 
 class Channel(db.Model):
   title = db.StringProperty()
