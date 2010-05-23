@@ -96,9 +96,9 @@ class Channel(db.Model):
 	  )
     except Error, e:
       logging.error("URL fetch %s failed: %s" % (HUB.url, e))
-      taskqueue.add("hub.mode="+action,
-	            name="subscribe",
-	            url=WORKER.subscriber+self.key())
+      taskqueue.Task("hub.mode="+action,
+	  name="subscribe",
+	  url=WORKER.subscriber+self.key()).add(queue_name="subscribe")
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
     else:
       # 204 - Already done
@@ -110,9 +110,9 @@ class Channel(db.Model):
 	    (action, self.topic))
       else:
 	logging.warning("Hub %d: %s" % (re.status_code, re.content))
-	taskqueue.add("hub.mode="+action,
-		      name="subscribe",
-		      url=WORKER.subscriber+self.key())
+	taskqueue.Task("hub.mode="+action,
+	    name="subscribe",
+	    url=WORKER.subscriber+self.key()).add(queue_name="subscribe")
 	self.status = "unsubscribed" if action == "subscribe" else "subscribed"
 
     self.put()

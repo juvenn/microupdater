@@ -84,10 +84,9 @@ class PushCallback(webapp.RequestHandler):
     type = self.request.headers["Content-Type"]
     if type == "application/atom+xml" or type == "application/rss+xml":
       key = self.request.path[len(WORKER.subbub):]
-      taskqueue.add(self.request.body.decode("utf-8"),
-	            name="parse",
-		    url=WORKER.parser + key,
-		    headers={"Content-Type": type})
+      taskqueue.Task(self.request.body.decode("utf-8"),
+	  url=WORKER.parser + key,
+	  headers={"Content-Type": type}).add(queue_name="parse")
       self.response.set_status(200)
       logging.info("Upon notifications: %s from %s" % 
 	  (self.request.url, self.request.remote_addr))
