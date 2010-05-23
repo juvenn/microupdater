@@ -25,7 +25,9 @@
 	    {% endfor %}
 	  </ul>
       {% endfor %}
+      <hr style="height:.2em;color:black;" />
 
-      {% if bookmark %}
-      <a id="bookmark" href="/?bookmark={{ bookmark|urlencode }}">MORE</a>
+      {% if next %}
+      <a id="next" onclick="nextPage(); return false"
+	href="/?next={{next|urlencode}}">MORE</a>
       {% endif %}
