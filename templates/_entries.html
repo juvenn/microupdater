@@ -13,7 +13,7 @@
 	        <span class="title">
 	          <a href="{{e.link}}">{{e.title|truncatewords:10}}</a>
 	        </span>
-		<span class="summary">{{e.summary|striptags|truncatewords:40}}</span>
+		<span class="summary">{{e.content|striptags|truncatewords:40}}</span>
 	      </p>
 	    <div class="meta">
 	      <span class="time">{{e.updated|timesince}} ago</span>
