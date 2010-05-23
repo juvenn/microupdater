@@ -97,6 +97,7 @@ class Channel(db.Model):
     except Error, e:
       logging.error("URL fetch %s failed: %s" % (HUB.url, e))
       taskqueue.add("hub.mode="+action,
+	            name="subscribe",
 	            url=WORKER.subscriber+self.key())
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
     else:
@@ -110,6 +111,7 @@ class Channel(db.Model):
       else:
 	logging.warning("Hub %d: %s" % (re.status_code, re.content))
 	taskqueue.add("hub.mode="+action,
+		      name="subscribe",
 		      url=WORKER.subscriber+self.key())
 	self.status = "unsubscribed" if action == "subscribe" else "subscribed"
 

@@ -85,6 +85,7 @@ class PushCallback(webapp.RequestHandler):
     if type == "application/atom+xml" or type == "application/rss+xml":
       key = self.request.path[len(WORKER.subbub):]
       taskqueue.add(self.request.body.decode("utf-8"),
+	            name="parse",
 		    url=WORKER.parser + key,
 		    headers={"Content-Type": type})
       self.response.set_status(200)
