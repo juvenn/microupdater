@@ -9,6 +9,7 @@
 import os
 import logging
 
+from datetime import datetime
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -23,15 +24,15 @@ class MainPage(webapp.RequestHandler):
   def get(self):
     context = {}
     query = Entry.all().order("-updated")
-    bookmark = self.request.get("bookmark")
-    if bookmark:
-      dt = datetime.strptime(bookmark, "%Y-%m-%dT%H:%M:%S.%f")
+    next = self.request.get("next")
+    if next:
+      dt = datetime.strptime(next, "%Y-%m-%dT%H:%M:%S")
       entries = query.filter("updated <=",
 	  dt).fetch(PAGESIZE + 1)
       if len(entries) == PAGESIZE + 1:
-	context["bookmark"] = entries[-1].updated.isoformat("T")
+	context["next"] = entries[-1].updated.isoformat("T")
       else:
-	context["bookmark"] = None
+	context["next"] = None
       context["entries"] = entries[:PAGESIZE]
       self.response.out.write(self.render_sec_entries(context))
       return
@@ -39,9 +40,9 @@ class MainPage(webapp.RequestHandler):
       sec = {}
       entries = query.fetch(PAGESIZE + 1)
       if len(entries) == PAGESIZE + 1:
-	context["bookmark"] = entries[-1].updated.isoformat("T")
+	context["next"] = entries[-1].updated.isoformat("T")
       else:
-	context["bookmark"] = None
+	context["next"] = None
       context["entries"] = entries[:PAGESIZE]
       sec["entries"] = self.render_sec_entries(context)
 
