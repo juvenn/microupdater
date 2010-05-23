@@ -1,0 +1,9 @@
+queue:
+- name: default
+  rate: 1/s
+
+- name: parse
+  rate: 5/s
+
+- name: subscribe
+  rate: 1/m
