@@ -88,18 +88,20 @@ class Channel(db.Model):
       taskqueue.add("hub.mode="+action,
 	            url=WORKER.subscriber+self.key())
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
-    # 204 - Already done
-    # 202 - Accepted, wait for verification
-    elif re.status_code == 204:
-      self.status = action + "d"
-    elif re.status_code == 202:
-      logging.info("The request accepted: %s to %s" % 
-	  (action, self.topic))
     else:
-      logging.warning("Hub %d: %s" % (re.status_code, re.content))
-      taskqueue.add("hub.mode="+action,
-	            url=WORKER.subscriber+self.key())
-      self.status = "unsubscribed" if action == "subscribe" else "subscribed"
+      # 204 - Already done
+      # 202 - Accepted, wait for verification
+      if re.status_code == 204:
+	self.status = action + "d"
+      elif re.status_code == 202:
+	logging.info("The request accepted: %s to %s" % 
+	    (action, self.topic))
+      else:
+	logging.warning("Hub %d: %s" % (re.status_code, re.content))
+	taskqueue.add("hub.mode="+action,
+		      url=WORKER.subscriber+self.key())
+	self.status = "unsubscribed" if action == "subscribe" else "subscribed"
+
     self.put()
 
 

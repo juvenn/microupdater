@@ -71,20 +71,21 @@ class PushCallback(webapp.RequestHandler):
 	  (self.request.path, self.request.remote_addr))
       # Precondition failed, key broken
       self.error(412)
-    elif channel:
-      mode = self.request.get("hub.mode")
-      if mode and channel.status == mode[:-1] + "ing":
-	channel.status = mode + "d"
-	channel.put()
-	self.response.out.write(self.request.get("hub.challenge"))
-	logging.info("Verify success: %s to %s" % 
-	    (channel.status, channel.topic))
-      else:
-	self.error(404)
     else:
-      # Topic not found
-      logging.error("Channel key not found: %s" % key)
-      self.error(412)
+      if channel:
+	mode = self.request.get("hub.mode")
+	if mode and channel.status == mode[:-1] + "ing":
+	  channel.status = mode + "d"
+	  channel.put()
+	  self.response.out.write(self.request.get("hub.challenge"))
+	  logging.info("Verify success: %s to %s" % 
+	      (channel.status, channel.topic))
+	else:
+	  self.error(404)
+      else:
+	# Topic not found
+	logging.error("Channel key not found: %s" % key)
+	self.error(412)
 
   # Upon notifications
   def post(self):
@@ -142,10 +143,11 @@ class ParseWorker(webapp.RequestHandler):
       channel = Channel.get(key)
     except:
       channel = Channel.all().filter("uid =", uid).get()
-    elif channel and not channel.uid:
-      channel.title = doc.feed.title.split(" - ")[0] 
-      channel.uid = uid
-      channel.put()
+    else:
+      if channel and not channel.uid:
+	channel.title = doc.feed.title.split(" - ")[0] 
+	channel.uid = uid
+	channel.put()
 
     updates = []
     for e in doc.entries:
