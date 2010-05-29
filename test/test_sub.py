@@ -1,6 +1,7 @@
 import unittest
 from webtest import TestApp
 from google.appengine.ext import db
+from google.appengine.ext import webapp
 from model import WORKER, HUB, Channel
 from sub import PushCallback
 
@@ -18,9 +19,9 @@ class TestVerification(unittest.TestCase):
     ch = Channel(title="Test Channel",
 	topic="http://dummychannel.dev/atom",
 	status="subscribing") 
-    self.channel = Channel.put()
+    self.channel = ch.put()
 
-  def test_challenge_code(self):
+  def testChallengeCode(self):
     app = TestApp(self.application)
     challenge = "venus"
     response = app.get(WORKER['subbub'] 
