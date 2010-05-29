@@ -22,7 +22,7 @@ handlers:
   script: croned.py
   login: admin
 
-- url: /admin/test*
+- url: /admin/test.*
   script: gaeunit.py
   login: admin
 
