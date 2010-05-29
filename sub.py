@@ -26,7 +26,7 @@ class PushCallback(webapp.RequestHandler):
   """
   # Upon verifications
   #
-  # PuSH verification will come at WORKER.subbub + `key`
+  # PuSH verification will come at WORKER['subbub'] + `key`
   #
   # Response:
   # 200: hub.challenge  
@@ -43,15 +43,15 @@ class PushCallback(webapp.RequestHandler):
     logging.info("Upon verification: %s from %s" % 
 	(self.request.url, self.request.remote_addr))
     token = self.request.get("hub.verify_token")
-    if token != HUB.token:
+    if token != HUB['token']:
       # Unauthorized, token not match
       self.error(401)
       logging.error("Token not match: %s from %s" % 
 	  (self.request.url, self.request.remote_addr))
       return # fail fast
 
-    # path = WORKER.subbub + "key"
-    key = self.request.path[len(WORKER.subbub):] 
+    # path = WORKER['subbub'] + "key"
+    key = self.request.path[len(WORKER['subbub']):] 
     try:
       channel = Channel.get(key)
     except KindError:
@@ -83,9 +83,9 @@ class PushCallback(webapp.RequestHandler):
     """
     type = self.request.headers["Content-Type"]
     if type == "application/atom+xml" or type == "application/rss+xml":
-      key = self.request.path[len(WORKER.subbub):]
+      key = self.request.path[len(WORKER['subbub']):]
       taskqueue.Task(self.request.body.decode("utf-8"),
-	  url=WORKER.parser + key,
+	  url=WORKER['parser'] + key,
 	  headers={"Content-Type": type}).add(queue_name="parse")
       self.response.set_status(200)
       logging.info("Upon notifications: %s from %s" % 
@@ -119,8 +119,8 @@ class ParseWorker(webapp.RequestHandler):
         logging.info('Body segment with error: %r', segment.decode('utf-8'))
       return # fail fast
 
-    # WORKER.parser + `key`
-    key = self.request.path[len(WORKER.parser):]
+    # WORKER['parser'] + `key`
+    key = self.request.path[len(WORKER['parser']):]
     # Try to get the channel by key;
     # fallback to feed id, if not found;
     # and at last we'll resort to entry source id,
@@ -180,7 +180,7 @@ class SubscribeWorker(webapp.RequestHandler):
     self.error(501)
 
   def post(self):
-    key = self.request.path[len(WORKER.subscriber):]
+    key = self.request.path[len(WORKER['subscriber']):]
     try:
       channel = Channel.get(key)
     except:
@@ -200,9 +200,9 @@ class SubscribeWorker(webapp.RequestHandler):
       self.error(204)
 
 application = webapp.WSGIApplication([
-  (WORKER.subbub + "*", PushCallback),
-  (WORKER.parser + "*", ParseWorker),
-  (WORKER.subscriber + "*", SubscribeWorker),
+  (WORKER['subbub'] + "*", PushCallback),
+  (WORKER['parser'] + "*", ParseWorker),
+  (WORKER['subscriber'] + "*", SubscribeWorker),
   ])
 
 def main():

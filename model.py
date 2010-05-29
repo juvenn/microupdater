@@ -78,27 +78,27 @@ class Channel(db.Model):
 	"hub.mode": action,
 	"hub.topic": self.topic,
 	"hub.verify": "async",
-	"hub.callback": WORKER.subbub + self.key(),
-	"hub.verify_token": HUB.token
+	"hub.callback": WORKER['subbub'] + self.key(),
+	"hub.verify_token": HUB['token']
 	}
     data = urllib.urlencode(params)
     headers={"Content-Type": "application/x-www-form-urlencoded"}
 
     # Basic authorization
     if HUB.get("auth"):
-      authcode = base64.urlsafe_b64encode(":".join(HUB.auth))
+      authcode = base64.urlsafe_b64encode(":".join(HUB['auth']))
       headers["Authorization"] = "Basic " + authcode
     try:
-      re = urlfetch.fetch(url=HUB.url,
+      re = urlfetch.fetch(url=HUB['url'],
 	  payload=data,
 	  method=urlfetch.POST,
 	  headers=headers
 	  )
     except Error, e:
-      logging.error("URL fetch %s failed: %s" % (HUB.url, e))
+      logging.error("URL fetch %s failed: %s" % (HUB['url'], e))
       taskqueue.Task("hub.mode="+action,
 	  name="subscribe",
-	  url=WORKER.subscriber+self.key()).add(queue_name="subscribe")
+	  url=WORKER['subscriber']+self.key()).add(queue_name="subscribe")
       self.status = "unsubscribed" if action == "subscribe" else "subscribed"
     else:
       # 204 - Already done
@@ -112,7 +112,7 @@ class Channel(db.Model):
 	logging.warning("Hub %d: %s" % (re.status_code, re.content))
 	taskqueue.Task("hub.mode="+action,
 	    name="subscribe",
-	    url=WORKER.subscriber+self.key()).add(queue_name="subscribe")
+	    url=WORKER['subscriber']+self.key()).add(queue_name="subscribe")
 	self.status = "unsubscribed" if action == "subscribe" else "subscribed"
 
     self.put()

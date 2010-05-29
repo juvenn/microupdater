@@ -1,8 +1,8 @@
 import unittest
 from webtest import TestApp
 from google.appengine.ext import db
-from model import Channel
-from sub import WORKER, HUB, PushCallback
+from model import WORKER, HUB, Channel
+from sub import PushCallback
 
 
 class TestVerification(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestVerification(unittest.TestCase):
 
   def setUp(self):
     self.application = webapp.WSGIApplication([
-      (WORKER.subbub + "*",PushCallback)
+      (WORKER['subbub'] + "*",PushCallback)
       ],debug=True)
     ch = Channel(title="Test Channel",
 	topic="http://dummychannel.dev/atom",
@@ -23,12 +23,12 @@ class TestVerification(unittest.TestCase):
   def test_challenge_code(self):
     app = TestApp(self.application)
     challenge = "venus"
-    response = app.get(WORKER.subbub 
+    response = app.get(WORKER['subbub'] 
 	+ self.channel
 	+ "?hub.mode=subscribe"
 	+ "&hub.topic=" + self.channel.topic
 	+ "&hub.challenge=" + challenge
-	+ "&hub.verify_token=" + HUB.token)
+	+ "&hub.verify_token=" + HUB['token'])
     self.assertEqual(challenge, response.body)
 
   def tearDown(self):
