@@ -74,7 +74,7 @@ from google.appengine.api import datastore_file_stub
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 _LOCAL_TEST_DIR = 'test'  # location of files
-_WEB_TEST_DIR = '/test'   # how you want to refer to tests on your web server
+_WEB_TEST_DIR = '/admin/test'   # how you want to refer to tests on your web server
 _LOCAL_DJANGO_TEST_DIR = '../../gaeunit/test'
 
 # or:
