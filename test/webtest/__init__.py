@@ -14,17 +14,17 @@ import mimetypes
 import time
 import cgi
 import os
-#import webbrowser
-from Cookie import BaseCookie
+from Cookie import BaseCookie, CookieError
+from Cookie import _quote as cookie_quote
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
 import re
 from webob import Response, Request
-from wsgiref.validate import validator
+from webtest import lint
 
-__all__ = ['TestApp']
+__all__ = ['TestApp', 'TestRequest']
 
 def tempnam_no_warning(*args):
     """
@@ -53,7 +53,7 @@ class TestApp(object):
     # for py.test
     disabled = True
 
-    def __init__(self, app, extra_environ=None, relative_to=None):
+    def __init__(self, app, extra_environ=None, relative_to=None, use_unicode=True):
         """
         Wraps a WSGI application in a more convenient interface for
         testing.
@@ -79,6 +79,7 @@ class TestApp(object):
         if extra_environ is None:
             extra_environ = {}
         self.extra_environ = extra_environ
+        self.use_unicode = use_unicode
         self.reset()
 
     def reset(self):
@@ -94,6 +95,10 @@ class TestApp(object):
         if extra_environ:
             environ.update(extra_environ)
         return environ
+
+    def _remove_fragment(self, url):
+        scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
+        return urlparse.urlunsplit((scheme, netloc, path, query, ""))
 
     def get(self, url, params=None, headers=None, extra_environ=None,
             status=None, expect_errors=False):
@@ -142,6 +147,7 @@ class TestApp(object):
             url, environ['QUERY_STRING'] = url.split('?', 1)
         else:
             environ['QUERY_STRING'] = ''
+        url = self._remove_fragment(url)
         req = TestRequest.blank(url, environ)
         if headers:
             req.headers.update(headers)
@@ -149,9 +155,10 @@ class TestApp(object):
                                expect_errors=expect_errors)
 
     def _gen_request(self, method, url, params='', headers=None, extra_environ=None,
-             status=None, upload_files=None, expect_errors=False):
+                     status=None, upload_files=None, expect_errors=False,
+                     content_type=None):
         """
-        Do a generic request.  
+        Do a generic request.
         """
         environ = self._make_environ(extra_environ)
         # @@: Should this be all non-strings?
@@ -170,9 +177,12 @@ class TestApp(object):
             url, environ['QUERY_STRING'] = url.split('?', 1)
         else:
             environ['QUERY_STRING'] = ''
+        if content_type is not None:
+            environ['CONTENT_TYPE'] = content_type
         environ['CONTENT_LENGTH'] = str(len(params))
         environ['REQUEST_METHOD'] = method
         environ['wsgi.input'] = StringIO(params)
+        url = self._remove_fragment(url)
         req = TestRequest.blank(url, environ)
         if headers:
             req.headers.update(headers)
@@ -180,7 +190,8 @@ class TestApp(object):
                                expect_errors=expect_errors)
 
     def post(self, url, params='', headers=None, extra_environ=None,
-             status=None, upload_files=None, expect_errors=False):
+             status=None, upload_files=None, expect_errors=False,
+             content_type=None):
         """
         Do a POST request.  Very like the ``.get()`` method.
         ``params`` are put in the body of the request.
@@ -195,35 +206,35 @@ class TestApp(object):
         return self._gen_request('POST', url, params=params, headers=headers,
                                  extra_environ=extra_environ,status=status,
                                  upload_files=upload_files,
-                                 expect_errors=expect_errors)
+                                 expect_errors=expect_errors,
+                                 content_type=content_type)
 
     def put(self, url, params='', headers=None, extra_environ=None,
-             status=None, upload_files=None, expect_errors=False):
+            status=None, upload_files=None, expect_errors=False,
+            content_type=None):
         """
-        Do a PUT request.  Very like the ``.get()`` method.
-        ``params`` are put in the body of the request.
-
-        ``upload_files`` is for file uploads.  It should be a list of
-        ``[(fieldname, filename, file_content)]``.  You can also use
-        just ``[(fieldname, filename)]`` and the file content will be
-        read from disk.
+        Do a PUT request.  Very like the ``.put()`` method.
+        ``params`` are put in the body of the request, if params is a
+        tuple, dictionary, list, or iterator it will be urlencoded and
+        placed in the body as with a POST, if it is string it will not
+        be encoded, but placed in the body directly.
 
         Returns a ``webob.Response`` object.
         """
         return self._gen_request('PUT', url, params=params, headers=headers,
                                  extra_environ=extra_environ,status=status,
                                  upload_files=upload_files,
-                                 expect_errors=expect_errors)
+                                 expect_errors=expect_errors,
+                                 content_type=content_type)
 
     def delete(self, url, headers=None, extra_environ=None,
                status=None, expect_errors=False):
         """
         Do a DELETE request.  Very like the ``.get()`` method.
-        ``params`` are put in the body of the request.
 
         Returns a ``webob.Response`` object.
         """
-        return self._gen_request('DELETE', url, params=params, headers=headers,
+        return self._gen_request('DELETE', url, headers=headers,
                                  extra_environ=extra_environ,status=status,
                                  upload_files=None, expect_errors=expect_errors)
 
@@ -275,23 +286,66 @@ class TestApp(object):
                 "you gave: %r"
                 % repr(file_info)[:100])
 
+
+    def request(self, url_or_req, status=None, expect_errors=False,
+                **req_params):
+        """
+        Creates and executes a request.  You may either pass in an
+        instantiated :class:`TestRequest` object, or you may pass in a
+        URL and keyword arguments to be passed to
+        :method:`TestRequest.blank`.
+
+        You can use this to run a request without the intermediary
+        functioning of :method:`TestApp.get` etc.  For instance, to
+        test a WebDAV method::
+
+            resp = app.request('/new-col', method='MKCOL')
+
+        Note that the request won't have a body unless you specify it,
+        like::
+
+            resp = app.request('/test.txt', method='PUT', body='test')
+
+        You can use ``POST={args}`` to set the request body to the
+        serialized arguments, and simultaneously set the request
+        method to ``POST``
+        """
+        if isinstance(url_or_req, basestring):
+            req = TestRequest.blank(url_or_req, **req_params)
+        else:
+            req = req.copy()
+            for name, value in req_params.iteritems():
+                setattr(req, name, value)
+        req.environ['paste.throw_errors'] = True
+        req.environ.update(self.extra_environ)
+        return self.do_request(req, status=status, expect_errors=expect_errors)
+
     def do_request(self, req, status, expect_errors):
         """
         Executes the given request (``req``), with the expected
         ``status``.  Generally ``.get()`` and ``.post()`` are used
         instead.
+
+        To use this::
+
+            resp = app.do_request(webtest.TestRequest.blank(
+                'url', ...args...))
+
+        Note you can pass any keyword arguments to
+        ``TestRequest.blank()``, which will be set on the request.
+        These can be arguments like ``content_type``, ``accept``, etc.
         """
         __tracebackhide__ = True
         errors = StringIO()
         req.environ['wsgi.errors'] = errors
         if self.cookies:
-            c = BaseCookie()
-            for name, value in self.cookies.items():
-                c[name] = value
-            req.environ['HTTP_COOKIE'] = str(c).split(': ', 1)[1]
+            cookie_header = ''.join([
+                '%s="%s"; ' % (name, cookie_quote(value))
+                for name, value in self.cookies.items()])
+            req.environ['HTTP_COOKIE'] = cookie_header
         req.environ['paste.testing'] = True
         req.environ['paste.testing_variables'] = {}
-        app = validator(self.app)
+        app = lint.middleware(self.app)
         old_stdout = sys.stdout
         out = CaptureStdout(old_stdout)
         try:
@@ -299,10 +353,10 @@ class TestApp(object):
             start_time = time.time()
             ## FIXME: should it be an option to not catch exc_info?
             res = req.get_response(app, catch_exc_info=True)
+            res._use_unicode = self.use_unicode
             end_time = time.time()
         finally:
             sys.stdout = old_stdout
-            sys.stderr.write(out.getvalue())
         res.app = app
         res.test_app = self
         # We do this to make sure the app_iter is exausted:
@@ -321,7 +375,11 @@ class TestApp(object):
             self._check_errors(res)
         res.cookies_set = {}
         for header in res.headers.getall('set-cookie'):
-            c = BaseCookie(header)
+            try:
+                c = BaseCookie(header)
+            except CookieError, e:
+                raise CookieError(
+                    "Could not parse cookie header %r: %s" % (header, e))
             for key, morsel in c.items():
                 self.cookies[key] = morsel.value
                 res.cookies_set[key] = morsel.value
@@ -417,13 +475,19 @@ class TestResponse(Response):
                     page.
                     """)
 
+    @property
+    def testbody(self):
+        if getattr(self, '_use_unicode', True) and self.charset:
+            return self.unicode_body
+        return self.body
+
     _tag_re = re.compile(r'<(/?)([:a-z0-9_\-]*)(.*?)>', re.S|re.I)
 
     def _parse_forms(self):
         forms = self._forms_indexed = {}
         form_texts = []
         started = None
-        for match in self._tag_re.finditer(self.body):
+        for match in self._tag_re.finditer(self.testbody):
             end = match.group(1) == '/'
             tag = match.group(2).lower()
             if tag != 'form':
@@ -431,14 +495,14 @@ class TestResponse(Response):
             if end:
                 assert started, (
                     "</form> unexpected at %s" % match.start())
-                form_texts.append(self.body[started:match.end()])
+                form_texts.append(self.testbody[started:match.end()])
                 started = None
             else:
                 assert not started, (
                     "Nested form tags at %s" % match.start())
                 started = match.start()
         assert not started, (
-            "Danging form: %r" % self.body[started:])
+            "Danging form: %r" % self.testbody[started:])
         for i, text in enumerate(form_texts):
             form = Form(self, text)
             forms[i] = form
@@ -504,7 +568,7 @@ class TestResponse(Response):
             tag='a', href_attr='href',
             href_extract=None,
             content=description,
-            id=linkid, 
+            id=linkid,
             href_pattern=href,
             html_pattern=anchor,
             index=index, verbose=verbose)
@@ -540,6 +604,10 @@ class TestResponse(Response):
 
         _tag_re = re.compile(r'<%s\s+(.*?)>(.*?)</%s>' % (tag, tag),
                              re.I+re.S)
+        _script_re = re.compile(r'<script.*?>.*?</script>', re.I|re.S)
+        bad_spans = []
+        for match in _script_re.finditer(self.testbody):
+            bad_spans.append((match.start(), match.end()))
 
         def printlog(s):
             if verbose:
@@ -547,7 +615,15 @@ class TestResponse(Response):
 
         found_links = []
         total_links = 0
-        for match in _tag_re.finditer(self.body):
+        for match in _tag_re.finditer(self.testbody):
+            found_bad = False
+            for bad_start, bad_end in bad_spans:
+                if (match.start() > bad_start
+                    and match.end() < bad_end):
+                    found_bad = True
+                    break
+            if found_bad:
+                continue
             el_html = match.group(0)
             el_attr = match.group(1)
             el_content = match.group(2)
@@ -623,6 +699,22 @@ class TestResponse(Response):
         assert method in ('get', 'post'), (
             'Only "get" or "post" are allowed for method (you gave %r)'
             % method)
+
+        # encode unicode strings for the outside world
+        if getattr(self, '_use_unicode', False):
+            def to_str(s):
+                if isinstance(s, unicode):
+                    return s.encode(self.charset)
+                return s
+
+            href = to_str(href)
+
+            if 'params' in args:
+                args['params'] = [tuple(map(to_str, p)) for p in args['params']]
+
+            if 'upload_files' in args:
+                args['upload_files'] = [map(to_str, f) for f in args['upload_files']]
+
         if method == 'get':
             method = self.test_app.get
         else:
@@ -632,7 +724,7 @@ class TestResponse(Response):
     _normal_body_regex = re.compile(r'[ \n\r\t]+')
 
     _normal_body = None
-    
+
     def normal_body__get(self):
         if self._normal_body is None:
             self._normal_body = self._normal_body_regex.sub(
@@ -701,18 +793,26 @@ class TestResponse(Response):
                     "Body does not contain string %r" % s)
         for no_s in no:
             if no_s in self:
-                print >> sys.stderr, "Actual response (has %r)" % s
+                print >> sys.stderr, "Actual response (has %r)" % no_s
                 print >> sys.stderr, self
                 raise IndexError(
-                    "Body contains string %r" % s)
+                    "Body contains bad string %r" % no_s)
 
     def __str__(self):
         simple_body = '\n'.join([l for l in self.body.splitlines()
                                  if l.strip()])
+        headers = [(self._normalize_header_name(n), v)
+                   for n, v in self.headerlist
+                   if n.lower() != 'content-length']
+        headers.sort()
         return 'Response: %s\n%s\n%s' % (
             self.status,
-            '\n'.join(['%s: %s' % (n, v) for n, v in self.headerlist]),
+            '\n'.join(['%s: %s' % (n, v) for n, v in headers]),
             simple_body)
+
+    def _normalize_header_name(self, name):
+        name = name.replace('-', ' ').title().replace(' ', '-')
+        return name
 
     def __repr__(self):
         # Specifically intended for doctests
@@ -724,7 +824,8 @@ class TestResponse(Response):
             br = repr(self.body)
             if len(br) > 18:
                 br = br[:10]+'...'+br[-5:]
-            body = ' body=%s/%s' % (br, len(self.body))
+                br += '/%s' % len(self.body)
+            body = ' body=%s' % br
         else:
             body = ' no body'
         if self.location:
@@ -751,7 +852,7 @@ class TestResponse(Response):
         except ImportError:
             raise ImportError(
                 "You must have BeautifulSoup installed to use response.html")
-        soup = BeautifulSoup(self.body)
+        soup = BeautifulSoup(self.testbody)
         return soup
 
     html = property(html, doc=html.__doc__)
@@ -780,6 +881,7 @@ class TestResponse(Response):
                 except ImportError:
                     raise ImportError(
                         "You must have ElementTree installed (or use Python 2.5) to use response.xml")
+        # ElementTree can't parse unicode => use `body` instead of `testbody`
         return ElementTree.XML(self.body)
 
     xml = property(xml, doc=xml.__doc__)
@@ -811,9 +913,9 @@ class TestResponse(Response):
             fromstring = etree.HTML
         ## FIXME: would be nice to set xml:base, in some fashion
         if self.content_type == 'text/html':
-            return fromstring(self.body)
+            return fromstring(self.testbody, base_url=self.request.url)
         else:
-            return etree.XML(self.body)
+            return etree.XML(self.testbody, base_url=self.request.url)
 
     lxml = property(lxml, doc=lxml.__doc__)
 
@@ -835,15 +937,37 @@ class TestResponse(Response):
         except ImportError:
             raise ImportError(
                 "You must have simplejson installed to use response.json")
-        return loads(self.body)
+        return loads(self.testbody)
 
     json = property(json, doc=json.__doc__)
+
+    def pyquery(self):
+        """
+        Returns the response as a `PyQuery <http://pyquery.org/>`_ object.
+
+        Only works with HTML and XML responses; other content-types raise
+        AttributeError.
+        """
+        if 'html' not in self.content_type and 'xml' not in self.content_type:
+            raise AttributeError(
+                "Not an HTML or XML response body (content-type: %s)"
+                % self.content_type)
+        try:
+            from pyquery import PyQuery
+        except ImportError:
+            raise ImportError(
+                "You must have PyQuery installed to use response.pyquery")
+        d = PyQuery(self.testbody)
+        return d
+
+    pyquery = property(pyquery, doc=pyquery.__doc__)
 
     def showbrowser(self):
         """
         Show this response in a browser window (for debugging purposes,
         when it's hard to read the HTML).
         """
+        import webbrowser
         fn = tempnam_no_warning(None, 'webtest-page') + '.html'
         f = open(fn, 'wb')
         f.write(self.body)
@@ -857,9 +981,10 @@ class TestRequest(Request):
     disabled = True
     ResponseClass = TestResponse
 
+
 ########################################
 ## Form objects
-######################################## 
+########################################
 
 class Form(object):
 
@@ -942,7 +1067,10 @@ class Form(object):
             tag_type = tag
             if tag == 'input':
                 tag_type = attrs.get('type', 'text').lower()
-            FieldClass = Field.classes.get(tag_type, Field)
+            if tag_type == "select" and attrs.get("multiple"):
+                FieldClass = Field.classes.get("multiple_select", Field)
+            else:
+                FieldClass = Field.classes.get(tag_type, Field)
             field = FieldClass(self, tag, name, match.start(), **attrs)
             if tag == 'textarea':
                 assert not in_textarea, (
@@ -1058,8 +1186,25 @@ class Form(object):
         ``.post()`` method.
         """
         fields = self.submit_fields(name, index=index)
+        uploads = self.upload_fields()
+        if uploads:
+            args["upload_files"] = uploads
         return self.response.goto(self.action, method=self.method,
                                   params=fields, **args)
+
+    def upload_fields(self):
+        """
+        Return a list of file field tuples of the form:
+            (field name, file name)
+        or
+            (field name, file name, file contents).
+        """
+        uploads = []
+        for name, fields in self.fields.items():
+            for field in fields:
+                if isinstance(field, File):
+                    uploads.append([name] + list(field.value))
+        return uploads
 
     def submit_fields(self, name=None, index=None):
         """
@@ -1071,15 +1216,25 @@ class Form(object):
             field = self.get(name, index=index)
             submit.append((field.name, field.value_if_submitted()))
         for name, fields in self.fields.items():
+            if name is None:
+                continue
             for field in fields:
                 value = field.value
                 if value is None:
                     continue
-                submit.append((name, value))
+                if isinstance(field, File):
+                    # skip file uploads; they need to be accounted
+                    # for differently
+                    continue
+                if isinstance(value, list):
+                    for item in value:
+                        submit.append((name, item))
+                else:
+                    submit.append((name, value))
         return submit
 
 
-_attr_re = re.compile(r'([^= \n\r\t]+)[ \n\r\t]*(?:=[ \n\r\t]*(?:"([^"]*)"|([^"][^ \n\r\t>]*)))?', re.S)
+_attr_re = re.compile(r'([^= \n\r\t]+)[ \n\r\t]*(?:=[ \n\r\t]*(?:"([^"]*)"|\'([^\']*)\'|([^"\'][^ \n\r\t>]*)))?', re.S)
 
 def _parse_attrs(text):
     attrs = {}
@@ -1087,7 +1242,10 @@ def _parse_attrs(text):
         attr_name = match.group(1).lower()
         attr_body = match.group(2) or match.group(3)
         attr_body = html_unquote(attr_body or '')
-        attrs[attr_name] = attr_body
+        # python <= 2.5 doesn't like **dict when the keys are unicode
+        # so cast str on them. Unicode field attributes are not
+        # supported now (actually they have never been supported).
+        attrs[str(attr_name)] = attr_body
     return attrs
 
 class Field(object):
@@ -1130,6 +1288,9 @@ class Field(object):
 
     value = property(value__get, value__set)
 
+class NoValue(object):
+    pass
+
 class Select(Field):
 
     """
@@ -1139,15 +1300,19 @@ class Select(Field):
     def __init__(self, *args, **attrs):
         super(Select, self).__init__(*args, **attrs)
         self.options = []
-        self.multiple = attrs.get('multiple')
-        assert not self.multiple, (
-            "<select multiple> not yet supported")
         # Undetermined yet:
         self.selectedIndex = None
+        # we have no forced value
+        self._forced_value = NoValue
+
+    def force_value(self, value):
+        self._forced_value = value
 
     def value__set(self, value):
+        if self._forced_value is not NoValue:
+            self._forced_value = NoValue
         for i, (option, checked) in enumerate(self.options):
-            if option == str(value):
+            if option == _stringify(value):
                 self.selectedIndex = i
                 break
         else:
@@ -1157,7 +1322,9 @@ class Select(Field):
                 [repr(o) for o, c in self.options])))
 
     def value__get(self):
-        if self.selectedIndex is not None:
+        if self._forced_value is not NoValue:
+            return self._forced_value
+        elif self.selectedIndex is not None:
             return self.options[self.selectedIndex][0]
         else:
             for option, checked in self.options:
@@ -1173,11 +1340,74 @@ class Select(Field):
 
 Field.classes['select'] = Select
 
+class MultipleSelect(Field):
+
+    """
+    Field representing ``<select multiple="multiple">``
+    """
+
+    def __init__(self, *args, **attrs):
+        super(MultipleSelect, self).__init__(*args, **attrs)
+        self.options = []
+        # Undetermined yet:
+        self.selectedIndices = []
+        self._forced_values = []
+
+    def force_value(self, values):
+        self._forced_values = values
+        self.selectedIndices = []
+
+    def value__set(self, values):
+        str_values = [_stringify(value) for value in values]
+        self.selectedIndicies = []
+        for i, (option, checked) in enumerate(self.options):
+            if option in str_values:
+                self.selectedIndices.append(i)
+                str_values.remove(option)
+        if str_values:
+            raise ValueError(
+                "Option(s) %r not found (from %s)"
+                % (', '.join(str_values),
+                   ', '.join(
+                        [repr(o) for o, c in self.options])))
+
+    def value__get(self):
+        selected_values = []
+        if self.selectedIndices:
+            selected_values = [self.options[i][0] for i in self.selectedIndices]
+        elif not self._forced_values:
+            selected_values = []
+            for option, checked in self.options:
+                if checked:
+                    selected_values.append(option)
+        if self._forced_values:
+            selected_values += self._forced_values
+
+        if self.options and (not selected_values):
+            selected_values = None
+        return selected_values
+    value = property(value__get, value__set)
+
+Field.classes['multiple_select'] = MultipleSelect
+
 class Radio(Select):
 
     """
     Field representing ``<input type="radio">``
     """
+
+    def value__get(self):
+        if self.selectedIndex is not None:
+            return self.options[self.selectedIndex][0]
+        else:
+            for option, checked in self.options:
+                if checked:
+                    return option
+            else:
+                return None
+
+    value = property(value__get, Select.value__set)
+
 
 Field.classes['radio'] = Radio
 
@@ -1197,8 +1427,7 @@ class Checkbox(Field):
     def value__get(self):
         if self.checked:
             if self._value is None:
-                # @@: 'on'?
-                return 'checked'
+                return 'on'
             else:
                 return self._value
         else:
@@ -1213,7 +1442,32 @@ class Text(Field):
     Field representing ``<input type="text">``
     """
 
+    def value__get(self):
+        if self._value is None:
+            return ''
+        else:
+            return self._value
+
+    value = property(value__get, Field.value__set)
+
 Field.classes['text'] = Text
+
+
+class File(Field):
+    """
+    Field representing ``<input type="file">``
+    """
+
+    ## FIXME: This doesn't actually handle file uploads and enctype
+    def value__get(self):
+        if self._value is None:
+            return ''
+        else:
+            return self._value
+
+    value = property(value__get, Field.value__set)
+
+Field.classes['file'] = File
 
 class Textarea(Text):
     """
@@ -1233,7 +1487,7 @@ class Submit(Field):
     """
     Field representing ``<input type="submit">`` and ``<button>``
     """
-    
+
     settable = False
 
     def value__get(self):
@@ -1253,6 +1507,11 @@ Field.classes['image'] = Submit
 ########################################
 ## Utility functions
 ########################################
+
+def _stringify(value):
+    if isinstance(value, unicode):
+        return value
+    return str(value)
 
 def _popget(d, key, default=None):
     """
@@ -1308,4 +1567,3 @@ def html_unquote(v):
                       ('&amp;', '&')]:
         v = v.replace(ent, repl)
     return v
-
