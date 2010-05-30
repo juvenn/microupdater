@@ -16,16 +16,16 @@ class TestVerification(unittest.TestCase):
     self.application = webapp.WSGIApplication([
       (WORKER['subbub'] + "*",PushCallback)
       ],debug=True)
-    ch = Channel(title="Test Channel",
+    self.channel = Channel(title="Test Channel",
 	topic="http://dummychannel.dev/atom",
 	status="subscribing") 
-    self.channel = ch.put()
+    self.channel.put()
 
   def testChallengeCode(self):
     app = TestApp(self.application)
     challenge = "venus"
     response = app.get(WORKER['subbub'] 
-	+ self.channel
+	+ str(self.channel.key())
 	+ "?hub.mode=subscribe"
 	+ "&hub.topic=" + self.channel.topic
 	+ "&hub.challenge=" + challenge
@@ -33,4 +33,4 @@ class TestVerification(unittest.TestCase):
     self.assertEqual(challenge, response.body)
 
   def tearDown(self):
-    Channel.delete(self.channel)
+    self.channel.delete()
