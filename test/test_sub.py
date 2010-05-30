@@ -21,7 +21,8 @@ class TestVerification(unittest.TestCase):
 	status="subscribing") 
     self.channel.put()
 
-  def testChallengeCode(self):
+  def testVerifySuccess(self):
+    """Verify should succeed"""
     app = TestApp(self.application)
     challenge = "venus"
     response = app.get(WORKER['subbub'] 
@@ -30,6 +31,7 @@ class TestVerification(unittest.TestCase):
 	+ "&hub.topic=" + self.channel.topic
 	+ "&hub.challenge=" + challenge
 	+ "&hub.verify_token=" + HUB['token'])
+    self.assertEqual("200 OK", response.status)
     self.assertEqual(challenge, response.body)
 
   def tearDown(self):
