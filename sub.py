@@ -69,6 +69,7 @@ class PushCallback(webapp.RequestHandler):
 	  logging.info("Verify success: %s to %s" % 
 	      (channel.status, channel.topic))
 	else:
+	  logging.error("Status not match: %s" % key)
 	  self.error(404)
       else:
 	# Topic not found
@@ -200,9 +201,9 @@ class SubscribeWorker(webapp.RequestHandler):
       self.error(204)
 
 application = webapp.WSGIApplication([
-  (WORKER['subbub'] + "*", PushCallback),
-  (WORKER['parser'] + "*", ParseWorker),
-  (WORKER['subscriber'] + "*", SubscribeWorker),
+  (WORKER['subbub'] + ".*", PushCallback),
+  (WORKER['parser'] + ".*", ParseWorker),
+  (WORKER['subscriber'] + ".*", SubscribeWorker),
   ])
 
 def main():

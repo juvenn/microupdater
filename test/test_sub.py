@@ -14,7 +14,7 @@ class TestVerification(unittest.TestCase):
 
   def setUp(self):
     self.application = webapp.WSGIApplication([
-      (WORKER['subbub'] + "*",PushCallback)
+      (WORKER['subbub'] + ".*",PushCallback)
       ],debug=True)
     self.channel = Channel(title="Test Channel",
 	topic="http://dummychannel.dev/atom",
