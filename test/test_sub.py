@@ -33,7 +33,10 @@ class TestVerification(unittest.TestCase):
 	+ "&hub.verify_token=" + HUB['token'])
     self.assertEqual("200 OK", response.status)
     self.assertEqual(challenge, response.body)
-    self.assertEqual(self.channel.status, "subscribed")
+    # Refetch the instance from the datastore, so its attributes
+    # get updated. 
+    channel = Channel.get(self.channel.key())
+    self.assertEqual(channel.status, "subscribed")
 
   def testBadVerifyToken(self):
     """Test bad verify_token
