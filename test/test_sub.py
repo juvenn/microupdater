@@ -22,7 +22,7 @@ class TestVerification(unittest.TestCase):
     self.channel.put()
 
   def testVerifySuccess(self):
-    """Verify should succeed"""
+    """Test verify success"""
     app = TestApp(self.application)
     challenge = "venus"
     response = app.get(WORKER['subbub'] 
@@ -33,6 +33,7 @@ class TestVerification(unittest.TestCase):
 	+ "&hub.verify_token=" + HUB['token'])
     self.assertEqual("200 OK", response.status)
     self.assertEqual(challenge, response.body)
+    self.assertEqual(self.channel.status, "subscribed")
 
   def testBadVerifyToken(self):
     """Test bad verify_token
