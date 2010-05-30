@@ -34,5 +34,22 @@ class TestVerification(unittest.TestCase):
     self.assertEqual("200 OK", response.status)
     self.assertEqual(challenge, response.body)
 
+  def testBadVerifyToken(self):
+    """Test bad verify_token
+
+    The (un)subscribe request must be initiated by someone else, or the
+    token is broken. Hub should not retry the verification, i.e. 404
+    Not Found should be responded.
+    """
+    app = TestApp(self.application)
+    challenge = "venus"
+    response = app.get(WORKER['subbub']
+	+ str(self.channel.key())
+	+ "?hub.mode=subscribe"
+	+ "&hub.topic=" + self.channel.topic
+	+ "&hub.challenge=" + challenge
+	+ "&hub.verify_token=" + "brokentoken")
+    self.assertEqual("404 Not Found", response.status)
+
   def tearDown(self):
     self.channel.delete()
