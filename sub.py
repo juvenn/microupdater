@@ -34,7 +34,7 @@ class PushCallback(webapp.RequestHandler):
   # 404:  
   #      Disagree with the action, please don't retry.
   # 40x:
-  #      Precondition failed, token not match, broken key, or topic not
+  #      Precondition failed, broken key, or topic not
   #      found. Please retry later.
   #
   # Please check PubSubHubbub specification for references.
@@ -44,8 +44,8 @@ class PushCallback(webapp.RequestHandler):
 	(self.request.url, self.request.remote_addr))
     token = self.request.get("hub.verify_token")
     if token != HUB['token']:
-      # Unauthorized, token not match
-      self.error(401)
+      # token not match
+      self.error(404)
       logging.error("Token not match: %s from %s" % 
 	  (self.request.url, self.request.remote_addr))
       return # fail fast
