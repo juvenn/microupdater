@@ -52,7 +52,8 @@ class TestVerification(unittest.TestCase):
 	+ "?hub.mode=subscribe"
 	+ "&hub.topic=" + self.channel.topic
 	+ "&hub.challenge=" + challenge
-	+ "&hub.verify_token=" + "brokentoken")
+	+ "&hub.verify_token=" + "brokentoken",
+	expect_errors=True)
     self.assertEqual("404 Not Found", response.status)
 
   def tearDown(self):
