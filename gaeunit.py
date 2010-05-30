@@ -24,7 +24,7 @@ Usage:
 Visit http://code.google.com/p/gaeunit for more information and updates.
 
 ------------------------------------------------------------------------------
-Copyright (c) 2008, George Lei and Steven R. Farley.  All rights reserved.
+Copyright (c) 2008-2009, George Lei and Steven R. Farley.  All rights reserved.
 
 Distributed under the following BSD license:
 
@@ -53,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 __author__ = "George Lei and Steven R. Farley"
 __email__ = "George.Z.Lei@Gmail.com"
-__version__ = "#Revision: 1.2.6 $"[11:-2]
-__copyright__= "Copyright (c) 2008, George Lei and Steven R. Farley"
+__version__ = "#Revision: 1.2.8 $"[11:-2]
+__copyright__= "Copyright (c) 2008-2009, George Lei and Steven R. Farley"
 __license__ = "BSD"
 __url__ = "http://code.google.com/p/gaeunit"
 
@@ -64,15 +64,18 @@ import unittest
 import time
 import logging
 import cgi
+import re
 import django.utils.simplejson
 
+from xml.sax.saxutils import unescape
 from google.appengine.ext import webapp
 from google.appengine.api import apiproxy_stub_map  
 from google.appengine.api import datastore_file_stub
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 _LOCAL_TEST_DIR = 'test'  # location of files
-_WEB_TEST_DIR = '/admin/test'   # how you want to refer to tests on your web server
+_WEB_TEST_DIR = '/test'   # how you want to refer to tests on your web server
+_LOCAL_DJANGO_TEST_DIR = '../../gaeunit/test'
 
 # or:
 # _WEB_TEST_DIR = '/u/test'
@@ -80,7 +83,138 @@ _WEB_TEST_DIR = '/admin/test'   # how you want to refer to tests on your web ser
 #   - url: /u/test.*
 #     script: gaeunit.py
 
+##################################################
+## Django support
 
+def django_test_runner(request):
+    unknown_args = [arg for (arg, v) in request.REQUEST.items()
+                    if arg not in ("format", "package", "name")]
+    if len(unknown_args) > 0:
+        errors = []
+        for arg in unknown_args:
+            errors.append(_log_error("The request parameter '%s' is not valid." % arg))
+        from django.http import HttpResponseNotFound
+        return HttpResponseNotFound(" ".join(errors))
+
+    format = request.REQUEST.get("format", "html")
+    package_name = request.REQUEST.get("package")
+    test_name = request.REQUEST.get("name")
+    if format == "html":
+        return _render_html(package_name, test_name)
+    elif format == "plain":
+        return _render_plain(package_name, test_name)
+    else:
+        error = _log_error("The format '%s' is not valid." % cgi.escape(format))
+        from django.http import HttpResponseServerError
+        return HttpResponseServerError(error)
+
+def _render_html(package_name, test_name):
+    suite, error = _create_suite(package_name, test_name, _LOCAL_DJANGO_TEST_DIR)
+    if not error:
+        content = _MAIN_PAGE_CONTENT % (_test_suite_to_json(suite), _WEB_TEST_DIR, __version__)
+        from django.http import HttpResponse
+        return HttpResponse(content)
+    else:
+        from django.http import HttpResponseServerError
+        return HttpResponseServerError(error)
+
+def _render_plain(package_name, test_name):
+    suite, error = _create_suite(package_name, test_name, _LOCAL_DJANGO_TEST_DIR)
+    if not error:
+        from django.http import HttpResponse
+        response = HttpResponse()
+        response["Content-Type"] = "text/plain"
+        runner = unittest.TextTestRunner(response)
+        response.write("====================\n" \
+                        "GAEUnit Test Results\n" \
+                        "====================\n\n")
+        _run_test_suite(runner, suite)
+        return response
+    else:
+        from django.http import HttpResponseServerError
+        return HttpResponseServerError(error)
+
+def django_json_test_runner(request):
+    from django.http import HttpResponse
+    response = HttpResponse()
+    response["Content-Type"] = "text/javascript"
+    test_name = request.REQUEST.get("name")
+    _load_default_test_modules(_LOCAL_DJANGO_TEST_DIR)
+    suite = unittest.defaultTestLoader.loadTestsFromName(test_name)
+    runner = JsonTestRunner()
+    _run_test_suite(runner, suite)
+    runner.result.render_to(response)
+    return response
+
+########################################################
+
+class GAETestCase(unittest.TestCase):
+    """TestCase parent class that provides the following assert functions
+        * assertHtmlEqual - compare two HTML string ignoring the 
+            out-of-element blanks and other differences acknowledged in standard.
+    """
+    
+    def assertHtmlEqual(self, html1, html2):
+        if html1 is None or html2 is None:
+            raise self.failureException, "argument is None"
+        html1 = self._formalize(html1)
+        html2 = self._formalize(html2)
+        if not html1 == html2:
+            error_msg = self._findHtmlDifference(html1, html2)
+            error_msg = "HTML contents are not equal" + error_msg
+            raise self.failureException, error_msg
+
+    def _formalize(self, html):
+        html = html.replace("\r\n", " ").replace("\n", " ")
+        html = re.sub(r"[ \t]+", " ", html)
+        html = re.sub(r"[ ]*>[ ]*", ">", html)
+        html = re.sub(r"[ ]*<[ ]*", "<", html)
+        return unescape(html)
+    
+    def _findHtmlDifference(self, html1, html2):
+        display_window_width = 41
+        html1_len = len(html1)
+        html2_len = len(html2)
+        for i in range(html1_len):
+            if i >= html2_len or html1[i] != html2[i]:
+                break
+            
+        if html1_len < html2_len:
+            html1 += " " * (html2_len - html1_len)
+            length = html2_len
+        else:
+            html2 += " " * (html1_len - html2_len)
+            length = html1_len
+            
+        if length <= display_window_width:
+            return "\n%s\n%s\n%s^" % (html1, html2, "_" * i)
+        
+        start = i - display_window_width / 2
+        end = i + 1 + display_window_width / 2
+        
+        if start < 0:
+            adjust = -start
+            start += adjust
+            end += adjust
+            pointer_pos = i
+            leading_dots = ""
+            ending_dots = "..."
+        elif end > length:
+            adjust = end - length
+            start -= adjust
+            end -= adjust
+            pointer_pos = i - start + 3
+            leading_dots = "..."
+            ending_dots = ""
+        else:
+            pointer_pos = i - start + 3
+            leading_dots = "..."
+            ending_dots = "..."
+        return '\n%s%s%s\n%s\n%s^' % (leading_dots, html1[start:end], ending_dots, leading_dots+html2[start:end]+ending_dots, "_" * (i - start + len(leading_dots)))
+    
+    assertHtmlEquals = assertHtmlEqual
+        
+      
 ##############################################################################
 # Main request handler
 ##############################################################################
@@ -99,27 +233,29 @@ class MainTestPageHandler(webapp.RequestHandler):
             return
 
         format = self.request.get("format", "html")
+        package_name = self.request.get("package")
+        test_name = self.request.get("name")
         if format == "html":
-            self._render_html()
+            self._render_html(package_name, test_name)
         elif format == "plain":
-            self._render_plain()
+            self._render_plain(package_name, test_name)
         else:
             error = _log_error("The format '%s' is not valid." % cgi.escape(format))
             self.error(404)
             self.response.out.write(error)
             
-    def _render_html(self):
-        suite, error = _create_suite(self.request)
+    def _render_html(self, package_name, test_name):
+        suite, error = _create_suite(package_name, test_name, _LOCAL_TEST_DIR)
         if not error:
             self.response.out.write(_MAIN_PAGE_CONTENT % (_test_suite_to_json(suite), _WEB_TEST_DIR, __version__))
         else:
             self.error(404)
             self.response.out.write(error)
         
-    def _render_plain(self):
+    def _render_plain(self, package_name, test_name):
         self.response.headers["Content-Type"] = "text/plain"
         runner = unittest.TextTestRunner(self.response.out)
-        suite, error = _create_suite(self.request)
+        suite, error = _create_suite(package_name, test_name, _LOCAL_TEST_DIR)
         if not error:
             self.response.out.write("====================\n" \
                                     "GAEUnit Test Results\n" \
@@ -155,7 +291,7 @@ class JsonTestResult(unittest.TestResult):
         for test, err in list:
             d = { 
               'desc': test.shortDescription() or str(test), 
-              'detail': err,
+              'detail': cgi.escape(err),
             }
             dict.append(d)
         return dict
@@ -176,7 +312,7 @@ class JsonTestRunHandler(webapp.RequestHandler):
     def get(self):    
         self.response.headers["Content-Type"] = "text/javascript"
         test_name = self.request.get("name")
-        _load_default_test_modules()
+        _load_default_test_modules(_LOCAL_TEST_DIR)
         suite = unittest.defaultTestLoader.loadTestsFromName(test_name)
         runner = JsonTestRunner()
         _run_test_suite(runner, suite)
@@ -187,7 +323,7 @@ class JsonTestRunHandler(webapp.RequestHandler):
 class JsonTestListHandler(webapp.RequestHandler):
     def get(self):
         self.response.headers["Content-Type"] = "text/javascript"
-        suite, error = _create_suite(self.request)
+        suite, error = _create_suite(self.request) #TODO
         if not error:
             self.response.out.write(_test_suite_to_json(suite))
         else:
@@ -200,10 +336,7 @@ class JsonTestListHandler(webapp.RequestHandler):
 ##############################################################################
 
 
-def _create_suite(request):
-    package_name = request.get("package")
-    test_name = request.get("name")
-
+def _create_suite(package_name, test_name, test_dir):
     loader = unittest.defaultTestLoader
     suite = unittest.TestSuite()
 
@@ -211,11 +344,11 @@ def _create_suite(request):
 
     try:
         if not package_name and not test_name:
-                modules = _load_default_test_modules()
+                modules = _load_default_test_modules(test_dir)
                 for module in modules:
                     suite.addTest(loader.loadTestsFromModule(module))
         elif test_name:
-                _load_default_test_modules()
+                _load_default_test_modules(test_dir)
                 suite.addTest(loader.loadTestsFromName(test_name))
         elif package_name:
                 package = reload(__import__(package_name))
@@ -227,16 +360,17 @@ def _create_suite(request):
             raise Exception("'%s' is not found or does not contain any tests." %  \
                             (test_name or package_name or 'local directory: \"%s\"' % _LOCAL_TEST_DIR))
     except Exception, e:
+        print e
         error = str(e)
         _log_error(error)
 
     return (suite, error)
 
 
-def _load_default_test_modules():
-    if not _LOCAL_TEST_DIR in sys.path:
-        sys.path.append(_LOCAL_TEST_DIR)
-        module_names = [mf[0:-3] for mf in os.listdir(_LOCAL_TEST_DIR) if mf.endswith(".py")]
+def _load_default_test_modules(test_dir):
+    if not test_dir in sys.path:
+        sys.path.append(test_dir)
+    module_names = [mf[0:-3] for mf in os.listdir(test_dir) if mf.endswith(".py")]
     return [reload(__import__(name)) for name in module_names]
 
 
@@ -287,10 +421,10 @@ def _run_test_suite(runner, suite):
     original_apiproxy = apiproxy_stub_map.apiproxy
     try:
        apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap() 
-       temp_stub = datastore_file_stub.DatastoreFileStub('GAEUnitDataStore', None, None)  
+       temp_stub = datastore_file_stub.DatastoreFileStub('GAEUnitDataStore', None, None, trusted=True)  
        apiproxy_stub_map.apiproxy.RegisterStub('datastore', temp_stub)
        # Allow the other services to be used as-is for tests.
-       for name in ['user', 'urlfetch', 'mail', 'memcache', 'images']: 
+       for name in ['user', 'urlfetch', 'mail', 'memcache', 'images', 'blobstore']: 
            apiproxy_stub_map.apiproxy.RegisterStub(name, original_apiproxy.GetStub(name))
        runner.run(suite)
     finally:
@@ -443,8 +577,8 @@ _MAIN_PAGE_CONTENT = """
             for the latest version or to report problems.
         </p>
         <p>
-            Copyright 2008 <a href="mailto:George.Z.Lei@Gmail.com">George Lei</a>
-            and <a href="mailto:srfarley@gmail.com>Steven R. Farley</a>
+            Copyright 2008-2009 <a href="mailto:George.Z.Lei@Gmail.com">George Lei</a>
+            and <a href="mailto:srfarley@gmail.com">Steven R. Farley</a>
         </p>
         </div>
     </div>
