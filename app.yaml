@@ -5,8 +5,8 @@ api_version: 1
 
 handlers:
 - url: /robots.txt
-  static_files: static/robots.txt
-  upload: static/robots.txt
+  static_files: media/robots.txt
+  upload: public/robots.txt
 
 - url: /favicon.ico
   static_files: media/images/favicon.png
