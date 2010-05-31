@@ -155,10 +155,13 @@ p.entry img {
 /*-------------in ft---------------------*/
 #ft {
   color: #999;
-  font-size: 1.2em;
   text-align: center;
   padding-top: 2em;
   padding-bottom: 2em;
   border-top: solid 4px #ccc;
 }
+
+#ft p { padding-bottom: .5em; }
+
+#nav { font-size: 1.2em; }
 
