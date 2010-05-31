@@ -1,8 +1,21 @@
 {% extends "base.html" %}
 
-{% block main %}
-  <div id="entries" class="section">
-  {{ entries }}
+
+{% block bd %}
+  <div id="bd" class="yui-gc">
+
+    <div id="main" class="yui-u first">
+      <div id="entries" class="section">
+	{{ entries }}
+      </div>
+    </div>
+
+    <div id="side" class="yui-u">
+      <div id="featured" class="section">
+	{{ featured }}
+      </div>
+    </div>
+
   </div>
-{% endblock main %}
+{% endblock bd %}
 
