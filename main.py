@@ -77,7 +77,7 @@ class FollowingPage(webapp.RequestHandler):
   """
   def get(self):
     context = {}
-    context['channels'] = Channel.all().fetch(1000)
+    context['channels'] = Channel.all().order("title").fetch(1000)
     path = templatepath("following.html")
     self.response.out.write(template.render(path, context))
 
