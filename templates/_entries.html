@@ -3,9 +3,9 @@
       <h3 class="section">
 	<span>{{g.grouper|date:"l, d N"}}</span>
       </h3>
-	  <ul class="entries">
+	  <ul class="collection">
 	    {% for e in g.list %}
-	    <li class="entry">
+	    <li class="item">
 	      <p class="entry">
 	      <span class="channel">
 		<a href="{{e.channel.link}}">{{e.channel.title|truncatewords:5}}</a>
@@ -15,12 +15,12 @@
 	        </span>
 		<span class="summary">{{e.content|striptags|truncatewords:40}}</span>
 	      </p>
-	    <div class="meta">
+	    <p class="meta">
 	      <span class="time">{{e.updated|timesince}} ago</span>
 	      {% if e.author %}
 	     - BY <span class="author">{{e.author}}</span>
 	      {% endif %}
-	    </div>
+	    </p>
 	    </li>
 	    {% endfor %}
 	  </ul>

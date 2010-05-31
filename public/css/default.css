@@ -1,58 +1,24 @@
-/**
- * Microupdater Design
- */
-
 
 body {
   font-family: "Lucida Grande", "Droid Sans", sans-serif;
-  background-color: #ccc;
+  background-color: #999;
   padding: 0 8%;
 }
 
-a {
-  text-decoration: none;
-}
-a:visited {
-  color: #004ca3;
-}
-a:link {
-  color: #0076d0;
-}
-a:hover {
-  text-decoration: underline;
-}
+a { text-decoration: none; }
+a:visited { color: #004ca3; }
+a:link { color: #0076d0; }
+a:hover { text-decoration: underline; }
 
-h1.title a:link,
-h1.title a:visited {
-  color: #000;
-}
-h1.title a:hover {
-  color: #0076d0;
-  text-decoration: none;
-}
+#doc3 { background-color: #fff; border-top: solid 5px #000; }
+.time { color: #d69300; }
 
-#doc3 {
-  background-color: #fff;
-  border-top: solid 5px #000;
-}
-
-.time {
-  color: #d69300;
-}
-
-/*-------------- in hd--------------- */
 #hd {
   color: #666;
   text-align: center;
   padding-top: 2em;
   padding-bottom: 4em;
   border-bottom: solid 4px #ccc;
-}
-
-#logo {
-  float: right;
-  width: 30%;
-  text-align: left;
 }
 
 h1.title {
@@ -63,106 +29,40 @@ h1.title {
   background-repeat: no-repeat;
 }
 
-h2.subtitle {
-  color: #666;
-  font-family: "FFF Tusj";
-  font-size: 2.4em;
-  padding-top: .2em;
-}
+h1.title a:link, h1.title a:visited { color: #000; }
+h1.title a:hover { color: #0076d0; text-decoration: none; }
+h2.subtitle { color: #666; font-size: 2.4em; padding-top: .2em; }
+#logo { float: right; width: 30%; text-align: left; }
 
-/*---------------in yui-gc--------------------*/
-.yui-gc div.first {
-  width: 66.8%;
-  border-right: solid 2px #ccc;
-}
-
-div#side {
-  margin-left: 0;
-}
-div.section {
-  margin: 1em 2em 1em 1em;
-}
-/*---------------in main--------------------*/
-.yui-u {
-}
+.yui-gc div.first { width: 66.8%; border-right: solid 2px #ccc; }
+div.section { margin: 1em 2em; }
+#side { margin-left: 0; }
 
 h3.section {
   color: #666;
   font-variant: small-caps;
+  margin: 1em 0;
   border-bottom: solid 1px #ccc;
-  margin-top: 1em;
-  margin-bottom: 1.5em;
 }
 h3.section span {
-  position: relative;
   top: .5em;
-  background-color: #fff;
+  position: relative;
   padding-right: .4em;
+  background-color: #fff;
 }
 
-/*-----------in list------------------*/
-ul.entries {
-  margin-left: .5em;
-}
+.collection { margin-left: .5em; }
+li.item { color: #333; line-height: 1.4em; padding: .6em; }
+li.item .channel:after { content: " / "; }
+li.item .channel,
+li.item .title { font-size: 1.2em; text-transform: capitalize; }
+li.item .meta { font-size: .86em; }
+li.item .meta .author { font-weight: bold; }
 
-li.entry {
-  color: #333;
-  list-style: none;
-  line-height: 1.4em;
-  padding: .8em .6em;
-}
+#featured { border: solid 1px #ddd; background-color: #eef; }
+#featured h3 { font-size: 1.2em; margin-top: .5em; }
+#featured h3 span { background-color: #eef; top: 0; left: 1em; }
 
-li.entry .channel,
-li.entry .title {
-  font-size: 1.2em;
-  text-transform: capitalize;
-}
-
-li.entry .channel:after {
-  content: " / "
-}
-
-li.entry .meta {
-  font-size: .86em;
-}
-li.entry .meta .author {
-  font-weight: bold;
-}
-
-p.entry img {
-  max-height: 6em;
-  max-width: 6em;
-  float: right;
-}
-
-/*-------------in #side---------------------*/
-
-#featured {
-  border: solid 1px #ddd;
-  background-color: #eef;
-}
-
-#featured h3 {
-  font-size: 1.2em;
-  border-bottom: solid 1px #ddd;
-  margin-top: .5em;
-}
-#featured h3 span{
-  background-color: #eef;
-  top: 0;
-  left: 1em;
-}
-
-/*-------------in ft---------------------*/
-#ft {
-  color: #999;
-  text-align: center;
-  padding-top: 2em;
-  padding-bottom: 2em;
-  border-top: solid 4px #ccc;
-}
-
-#ft p { padding-bottom: .5em; }
-
-#nav { font-size: 1.2em; }
-
+#ft { color: #999; padding: 1em 3em; border-top: solid 2px #ccc; }
+#ft p { padding-top: .5em; }
+#links { font-size: 1.2em; }

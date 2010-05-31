@@ -9,14 +9,11 @@
       they're doing it excellently, like Rapportive, Dropbox, Zemanta. 
       </p>
 
-      <ol id="" class="collection">
+      <ol class="collection">
 	{% for c in channels %}
 	<li class="item">
-	<span class="meta">[{{c.status}}]</span>
-	<span class="title">{{c.title}}</span>:
-	<a href="{{c.topic}}">
-	  <span class="url">{{c.topic}}</span>
-	</a>
+	[<span class="meta">{{c.status}}</span>]
+	<span class="title"><a href="{{c.link}}">{{c.title}}</a></span>
 	</li>
 	{% endfor %}
       </ul>
