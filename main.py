@@ -18,6 +18,13 @@ from model import Entry, Channel
 # Entries per page
 PAGESIZE = 25
 
+def templatepath(filename):
+  """Build template path
+
+  templates directory default to `./templates/`
+  """
+  return os.path.join(os.path.dirname(__file__), "templates", filename)
+
 class MainPage(webapp.RequestHandler):
   """Home page handler"""
 
@@ -47,12 +54,12 @@ class MainPage(webapp.RequestHandler):
       sec["entries"] = self.render_sec_entries(context)
 
       sec["featured"] = self.render_sec_featured()
-      path = self.template("main.html")
+      path = templatepath("main.html")
       self.response.out.write(template.render(path, sec))
 
   def render_sec_entries(self, context):
     """Render entries section"""
-    path = self.template("_entries.html")
+    path = templatepath("_entries.html")
     return template.render(path, context)
 
   def render_sec_featured(self):
@@ -61,19 +68,23 @@ class MainPage(webapp.RequestHandler):
     featured_channels = query.fetch(6)
     entries = [ch.latest_entry for ch in featured_channels
 	if ch.latest_entry]
-    path = self.template("_featured.html")
+    path = templatepath("_featured.html")
     return template.render(path, {"entries":entries})
 
-  def template(self, filename):
-    """Build template path
 
-    templates directory default to `./templates/`
-    """
-    return os.path.join(os.path.dirname(__file__), "templates", filename)
+class FollowingPage(webapp.RequestHandler):
+  """List Fowllowing Channels
+  """
+  def get(self):
+    context = {}
+    context['channels'] = Channel.all().fetch(1000)
+    path = templatepath("following.html")
+    self.response.out.write(template.render(path, context))
 
 
 application = webapp.WSGIApplication([
   ("/", MainPage),
+  ("/following", FollowingPage),
   ])
 
 def main():

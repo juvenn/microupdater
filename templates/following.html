@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block main %}
+  <div id="channels" class="section">
+    <p>
+    We're following no more than a few hundreds of lean startup
+    blogs. The teams are attacking real issues, and more importantly
+    they're doing it excellently, like Rapportive, Dropbox, Zemanta. 
+    </p>
+
+    <ol class="collection">
+      {% for c in channels %}
+      <li>
+      <span class="">[{{c.status}}]</span>
+      <span class="">{{c.title}}</span>:
+      <span class="">{{c.topic}}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock main %}
+
