@@ -133,9 +133,12 @@ class ParseWorker(webapp.RequestHandler):
     except:
       channel = Channel.all().filter("uid =", uid).get()
     else:
+      # First time get the notification,
+      # so update channel's properties 
       if channel and not channel.uid:
 	channel.title = doc.feed.title.split(" - ")[0] 
 	channel.uid = uid
+	channel.link = doc.feed.get("link")
 	channel.put()
 
     updates = []
@@ -146,9 +149,8 @@ class ParseWorker(webapp.RequestHandler):
       t = e.updated_parsed if e.get("updated_parsed") else e.published_parsed
       updated = datetime(t[0],t[1],t[2],t[3],t[4],t[5])
 
-      # If we have this entry already in datastore, then the entry is
-      # updated instead of newly published. So we update the entity 
-      # instead of insert a new duplicated entity.
+      # If we have this entry already in datastore, then the entry 
+      # should be updated instead of inserted.
       ent = Entry.all().filter("uid =", e.id).get()
       if not ent:
 	if not channel: 

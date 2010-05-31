@@ -28,9 +28,12 @@ HUB = {
 
 class Channel(db.Model):
   title = db.StringProperty()
-  topic = db.LinkProperty(verbose_name="Feed URL",
+  # coincide hub.topic, should be a valid feed
+  # e.g. topic.com/topic/atom.xml
+  topic = db.LinkProperty(verbose_name="Channel Feed",
                           required=True)
-  blog = db.LinkProperty(verbose_name="Blog URL")
+  # e.g. example.com/topic
+  link = db.LinkProperty(verbose_name="Channel URL")
   # Feed's unique identifier
   uid = db.StringProperty()
   created = db.DateTimeProperty(auto_now_add=True)
