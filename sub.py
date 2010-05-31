@@ -138,7 +138,8 @@ class ParseWorker(webapp.RequestHandler):
       if channel and not channel.uid:
 	channel.title = doc.feed.title.split(" - ")[0] 
 	channel.uid = uid
-	channel.link = doc.feed.get("link")
+	# Fallback to topic feed, if no link found
+	channel.link = doc.feed.get("link", channel.topic)
 	channel.put()
 
     updates = []
