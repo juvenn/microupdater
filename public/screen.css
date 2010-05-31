@@ -6,6 +6,7 @@
 body {
   font-family: "Lucida Grande", "Droid Sans", sans-serif;
   background-color: #ccc;
+  padding: 0 8%;
 }
 
 a {
@@ -30,7 +31,7 @@ h1.title a:hover {
   text-decoration: none;
 }
 
-#doc4 {
+#doc3 {
   background-color: #fff;
   border-top: solid 5px #000;
 }
