@@ -88,3 +88,8 @@ class TestVerification(unittest.TestCase):
     response = self.verify(topic="http://random.dev/atom")
     self.assertEqual("404 Not Found", response.status)
 
+  def testModeNotMatch(self):
+    """Expect 404 Not Found if hub.mode not match
+    """
+    response = self.verify(mode="unsubscribe")
+    self.assertEqual("404 Not Found", response.status)
