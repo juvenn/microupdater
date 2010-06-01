@@ -21,8 +21,11 @@ class TestVerification(unittest.TestCase):
 	status="subscribing") 
     self.channel.put()
 
-  def testVerifySuccess(self):
-    """Test verify success"""
+  def testAllParamsMatch(self):
+    """All params match
+
+    Verify should success, `200 OK` responded.
+    """
     app = TestApp(self.application)
     challenge = "venus"
     response = app.get(WORKER['subbub'] 
