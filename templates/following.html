@@ -12,8 +12,9 @@
       <ol class="collection">
 	{% for c in channels %}
 	<li class="item">
-	[<span class="meta">{{c.status}}</span>]
 	<span class="title"><a href="{{c.link}}">{{c.title}}</a></span>
+	<span class="url">{{c.topic}}</span>
+	[<em class="meta">{{c.status}}</em>]
 	</li>
 	{% endfor %}
       </ul>
