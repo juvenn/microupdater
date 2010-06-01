@@ -27,6 +27,22 @@ class TestVerification(unittest.TestCase):
   def tearDown(self):
     self.channel.delete()
 
+  def get(self,
+          key=None,
+	  mode=None,
+	  topic=None,
+	  challenge=None,
+	  token=None):
+    """HTTP GET a verify request"""
+    url = WORKER['subbub']
+    if key: url += key + "?"
+    if mode: url += "hub.mode=" + mode
+    if topic: url += "&hub.topic=" + topic
+    if challenge: url += "&hub.challenge=" + challenge
+    if token: url += "&hub.verify_token=" + token
+    app = TestApp(self.application)
+    return app.get(url, expect_errors=True)
+
   def verify(self, 
              key=None, 
 	     topic=None, 
@@ -37,14 +53,11 @@ class TestVerification(unittest.TestCase):
     """
     if not key: key = str(self.channel.key())
     if not topic: topic = self.channel.topic
-    app = TestApp(self.application)
-    response = app.get(WORKER['subbub'] 
-	+ key
-	+ "?hub.mode=" + mode
-	+ "&hub.topic=" + topic
-	+ "&hub.challenge=" + challenge
-	+ "&hub.verify_token=" + token,
-	expect_errors=True)
+    response = self.get(key=key,
+	            mode=mode,
+		    topic=topic,
+		    challenge=challenge,
+		    token=token)
     return response
 
   def testAllParamsOK(self):
