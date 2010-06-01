@@ -56,8 +56,8 @@ class TestVerification(unittest.TestCase):
     response = self.verify()
     self.assertEqual("200 OK", response.status)
     self.assertEqual(challenge, response.body)
-    # Refetch the instance from the datastore, so its attributes
-    # get updated. 
+    # Refetch the instance from the datastore, 
+    # so its attributes get updated. 
     channel = Channel.get(self.channel.key())
     self.assertEqual(channel.status, "subscribed")
 
@@ -67,7 +67,6 @@ class TestVerification(unittest.TestCase):
     The (un)subscribe request must be initiated by someone else, or the
     token is broken. Hub will not retry.
     """
-    challenge = "venus"
     response = self.verify(token="brokentoken")
     self.assertEqual("404 Not Found", response.status)
 
@@ -77,7 +76,6 @@ class TestVerification(unittest.TestCase):
     The key associated with callback url could not be found in the
     datastore. Hub will not retry.
     """
-    challenge = "venus"
     response = self.verify(key="randomekeystring")
     self.assertEqual("404 Not Found", response.status)
 
@@ -87,7 +85,6 @@ class TestVerification(unittest.TestCase):
     The topic does not match with the record in datastore. Hub will
     not retry.
     """
-    challenge = "venus"
     response = self.verify(topic="http://random.dev/atom")
     self.assertEqual("404 Not Found", response.status)
 
