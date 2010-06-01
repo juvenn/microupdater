@@ -9,9 +9,9 @@ a { text-decoration: none; }
 a:visited { color: #004ca3; }
 a:link { color: #0076d0; }
 a:hover { text-decoration: underline; }
+em { color: #d69300; }
 
 #doc3 { background-color: #fff; border-top: solid 5px #000; }
-em { color: #d69300; }
 
 #hd {
   color: #666;
