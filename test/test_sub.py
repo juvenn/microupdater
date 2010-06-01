@@ -112,7 +112,7 @@ class TestNotification(unittest.TestCase):
   """Notification Test Cases
 
   PubSubHubbub 0.3:
-  2xx - Notification received
+  2xx - Notification success
   xxx - Fail, please retry the notification later
   """
   def setUp(self):
@@ -123,16 +123,67 @@ class TestNotification(unittest.TestCase):
 	topic="http://dummychannel.dev/atom",
 	status="subscribed") 
     self.channel.put()
+    self.atom = """
+<?xml version="1.0"?>
+<atom:feed>
+  <link rel="hub" href="http://myhub.example.com/endpoint" />
+  <link rel="self" href="http://publisher.example.com/happycats.xml" />
+  <updated>2008-08-11T02:15:01Z</updated>
+  <entry>
+    <title>Heathcliff</title>
+    <link href="http://publisher.example.com/happycat25.xml" />
+    <id>http://publisher.example.com/happycat25.xml</id>
+    <updated>2008-08-11T02:15:01Z</updated>
+    <content>
+      What a happy cat. Full content goes here.
+    </content>
+  </entry>
+  <entry >
+    <title>Heathcliff</title>
+    <link href="http://publisher.example.com/happycat25.xml" />
+    <id>http://publisher.example.com/happycat25.xml</id>
+    <updated>2008-08-11T02:15:01Z</updated>
+    <summary>
+      What a happy cat!
+    </summary>
+  </entry>
+  <entry>
+    <title>Garfield</title>
+    <link rel="alternate" href="http://publisher.example.com/happycat24.xml" />
+    <id>http://publisher.example.com/happycat25.xml</id>
+    <updated>2008-08-11T02:15:01Z</updated>
+  </entry>
+  <entry>
+    <title>Nermal</title>
+    <link rel="alternate" href="http://publisher.example.com/happycat23s.xml" />
+    <id>http://publisher.example.com/happycat25.xml</id>
+    <updated>2008-07-10T12:28:13Z</updated>
+  </entry>
+</atom:feed>
+    """
 
   def tearDown(self):
     self.channel.delete()
 
-  def notify(self, type, body):
+  def notify(self, key, type, body):
     """HTTP POST notification
     """
     app = TestApp(self.application)
     ct = "application/rss+xml" if type == "rss" else "application/atom+xml"
-   response = app.post(WORKER["subbub"] + str(self.channel.key()),
+    response = app.post(WORKER["subbub"] + key,
              params=body,
-	     content_type=ct)
-   return response
+	     content_type=ct,
+	     expect_errors=True)
+    return response
+
+  def testNotifyAtomAsAtom(self):
+    """Success if notify atom as atom
+    """
+    response = self.notify(str(self.channel.key()), "atom", self.atom)
+    self.assertEqual("200 OK", response.status)
+
+  def testNotifyAtomAsRss(self):
+    """Success regardless of content-type not match.
+    """
+    response = self.notify(str(self.channel.key()), "rss", self.atom)
+    self.assertEqual("200 OK", response.status)
