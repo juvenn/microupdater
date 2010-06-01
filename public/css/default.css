@@ -15,27 +15,19 @@ em { color: #d69300; }
 
 #hd {
   color: #666;
-  text-align: center;
-  padding-top: 2em;
-  padding-bottom: 4em;
+  padding: 3em;
   border-bottom: solid 4px #ccc;
 }
+#hd a:link, #hd a:visited { color: #000; }
+#hd a:hover { color: #0076d0; text-decoration: none; }
 
-h1.title {
-  font-family: Impact, sans-serif;
-  font-size: 44px;
-  background-image: url("/media/images/color-bar.png");
-  background-position: bottom left;
-  background-repeat: no-repeat;
-}
+h1.heading .title { font-family: Impact; font-size: 4em; }
+h1.heading .subtitle { color: #666; font-size: 1.5em; }
 
-h1.title a:link, h1.title a:visited { color: #000; }
-h1.title a:hover { color: #0076d0; text-decoration: none; }
-h2.subtitle { color: #666; font-size: 2.4em; padding-top: .2em; }
-#logo { float: right; width: 30%; text-align: left; }
+#bd { padding: 0 1em; }
+.yui-gc div.first { width: 66%; border-right: solid 2px #ccc; }
+div.section { margin: 1em; }
 
-.yui-gc div.first { width: 66.8%; border-right: solid 2px #ccc; }
-div.section { margin: 1em 2em; }
 #side { margin-left: 0; }
 
 h3.section {
