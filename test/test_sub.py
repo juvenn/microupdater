@@ -7,9 +7,12 @@ from sub import PushCallback
 
 
 class TestVerification(unittest.TestCase):
-  """Test Verifications Handling
+  """Verifications Handling Test Cases
   
-  PubSubHubbub 0.3 Compliant
+  PubSubHubbub 0.3 Compliant, async mode only:
+  2xx - Verify success, subscription confirmed
+  404 - Disagree with the subscription, verify should not be retried
+  xxx - Verify temporarily failed, please retry later
   """
 
   def setUp(self):
@@ -21,10 +24,10 @@ class TestVerification(unittest.TestCase):
 	status="subscribing") 
     self.channel.put()
 
-  def testAllParamsMatch(self):
-    """All params match
+  def testAllParamsOK(self):
+    """Expect 200 OK if all params match.
 
-    Verify should success, `200 OK` responded.
+    Expect hub.challenge.
     """
     app = TestApp(self.application)
     challenge = "venus"
@@ -41,12 +44,11 @@ class TestVerification(unittest.TestCase):
     channel = Channel.get(self.channel.key())
     self.assertEqual(channel.status, "subscribed")
 
-  def testBadVerifyToken(self):
-    """Test bad verify_token
+  def testVerifyTokenNotMatch(self):
+    """Expect 404 Not Found if the verify token not match.
 
     The (un)subscribe request must be initiated by someone else, or the
-    token is broken. Hub should not retry the verification, i.e. 404
-    Not Found should be responded.
+    token is broken. Hub will not retry.
     """
     app = TestApp(self.application)
     challenge = "venus"
@@ -58,6 +60,24 @@ class TestVerification(unittest.TestCase):
 	+ "&hub.verify_token=" + "brokentoken",
 	expect_errors=True)
     self.assertEqual("404 Not Found", response.status)
+
+  def testCallbackNotMatch(self):
+    """Expect 404 Not Found if callback not found.
+
+    The key associated with callback url could not be found in the
+    datastore. Hub will not retry.
+    """
+    app = TestApp(self.application)
+    challenge = "venus"
+    response = app.get(WORKER['subbub']
+	+ "randomkeystring"
+	+ "?hub.mode=subscribe"
+	+ "&hub.topic=" + self.channel.topic
+	+ "&hub.challenge=" + challenge
+	+ "&hub.verify_token=" + HUB['token'],
+	expect_errors=True)
+    self.assertEqual("404 Not Found", response.status)
+
 
   def tearDown(self):
     self.channel.delete()
