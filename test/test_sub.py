@@ -106,3 +106,33 @@ class TestVerification(unittest.TestCase):
     """
     response = self.verify(mode="unsubscribe")
     self.assertEqual("404 Not Found", response.status)
+
+
+class TestNotification(unittest.TestCase):
+  """Notification Test Cases
+
+  PubSubHubbub 0.3:
+  2xx - Notification received
+  xxx - Fail, please retry the notification later
+  """
+  def setUp(self):
+    self.application = webapp.WSGIApplication([
+      (WORKER['subbub'] + ".*",PushCallback)
+      ],debug=True)
+    self.channel = Channel(title="Test Channel",
+	topic="http://dummychannel.dev/atom",
+	status="subscribed") 
+    self.channel.put()
+
+  def tearDown(self):
+    self.channel.delete()
+
+  def notify(self, type, body):
+    """HTTP POST notification
+    """
+    app = TestApp(self.application)
+    ct = "application/rss+xml" if type == "rss" else "application/atom+xml"
+   response = app.post(WORKER["subbub"] + str(self.channel.key()),
+             params=body,
+	     content_type=ct)
+   return response

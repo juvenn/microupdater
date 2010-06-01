@@ -23,23 +23,20 @@ import feedparser
 
 class PushCallback(webapp.RequestHandler):
   """PuSH callback handler
+
+  PubSubHubbub 0.3 spec
   """
-  # Upon verifications
-  #
-  # PuSH verification will come at WORKER['subbub'] + `key`
-  #
-  # Response:
-  # 200: hub.challenge  
-  #      We agree with the action, the token matched, the topic found.
-  # 404:  
-  #      Disagree with the action, please don't retry.
-  # 40x:
-  #      Precondition failed, broken key, or topic not
-  #      found. Please retry later.
-  #
-  # Please check PubSubHubbub specification for references.
   def get(self):
-    """Handling PuSH verification"""
+    """Handling PuSH verification
+
+    Response:
+    2xx hub.challenge  
+        We agree with the action, the token matched, the topic found.
+    404  
+        Disagree with the action, please don't retry.
+    4xx / 5xx
+        Temporary failure, please retry later.
+    """
     logging.info("Upon verification: %s from %s" % 
 	(self.request.url, self.request.remote_addr))
     token = self.request.get("hub.verify_token")
@@ -50,6 +47,7 @@ class PushCallback(webapp.RequestHandler):
 	  (self.request.url, self.request.remote_addr))
       return # fail fast
 
+    # PuSH verification will come at WORKER['subbub'] + `key`
     # path = WORKER['subbub'] + "key"
     key = self.request.path[len(WORKER['subbub']):] 
     try:
@@ -78,9 +76,15 @@ class PushCallback(webapp.RequestHandler):
 	logging.error("Channel key not found: %s" % key)
 	self.error(412)
 
-  # Upon notifications
+  # Upon notification
   def post(self):
     """Handle PuSH notifications
+
+    Response:
+    2xx 
+        Notification received
+    3xx / 4xx / 5xx
+        Fail, please retry the notification later
 
     Atom/rss feed is queued to `ParseWorker` for later parsing
     """
