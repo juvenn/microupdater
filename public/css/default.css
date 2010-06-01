@@ -44,6 +44,7 @@ h3.section span {
 }
 
 .collection { margin-left: .5em; }
+ol li.item { list-style: decimal inside; }
 li.item { color: #333; line-height: 1.4em; padding: .6em; }
 li.item .channel:after { content: " / "; }
 li.item .channel,
