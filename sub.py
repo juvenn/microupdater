@@ -54,20 +54,19 @@ class PushCallback(webapp.RequestHandler):
     key = self.request.path[len(WORKER['subbub']):] 
     try:
       channel = Channel.get(key)
-    except KindError:
+    except:
       logging.error("Broken key: %s from %s" %
 	  (self.request.path, self.request.remote_addr))
-      # Precondition failed, key broken
-      self.error(412)
+      self.error(404)
     else:
       if channel:
 	mode = self.request.get("hub.mode")
 	if mode and channel.status == mode[:-1] + "ing":
 	  channel.status = mode + "d"
 	  channel.put()
-	  self.response.out.write(self.request.get("hub.challenge"))
 	  logging.info("Verify success: %s to %s" % 
 	      (channel.status, channel.topic))
+	  self.response.out.write(self.request.get("hub.challenge"))
 	else:
 	  logging.error("Status not match: %s" % key)
 	  self.error(404)
