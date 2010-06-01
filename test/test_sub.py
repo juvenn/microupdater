@@ -78,6 +78,23 @@ class TestVerification(unittest.TestCase):
 	expect_errors=True)
     self.assertEqual("404 Not Found", response.status)
 
+  def testTopicNotMatch(self):
+    """Expect 404 Not Found if topic not match
+
+    The topic does not match with the record in datastore. Hub will
+    not retry.
+    """
+    app = TestApp(self.application)
+    challenge = "venus"
+    response = app.get(WORKER['subbub']
+	+ str(self.channel.key())
+	+ "?hub.mode=subscribe"
+	+ "&hub.topic=" + "http://random.dev/atom"
+	+ "&hub.challenge=" + challenge
+	+ "&hub.verify_token=" + HUB['token'],
+	expect_errors=True)
+    self.assertEqual("404 Not Found", response.status)
+
 
   def tearDown(self):
     self.channel.delete()
