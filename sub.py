@@ -61,14 +61,17 @@ class PushCallback(webapp.RequestHandler):
     else:
       if channel:
 	mode = self.request.get("hub.mode")
-	if mode and channel.status == mode[:-1] + "ing":
+	topic = self.request.get("hub.topic")
+	if (mode and topic and channel.status == mode[:-1] + "ing"  
+	         and channel.topic == topic):
 	  channel.status = mode + "d"
 	  channel.put()
 	  logging.info("Verify success: %s to %s" % 
 	      (channel.status, channel.topic))
 	  self.response.out.write(self.request.get("hub.challenge"))
 	else:
-	  logging.error("Status not match: %s" % key)
+	  logging.error("Status or topic not match: %s" %
+	      self.request.url)
 	  self.error(404)
       else:
 	# Topic not found
