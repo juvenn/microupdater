@@ -24,19 +24,36 @@ class TestVerification(unittest.TestCase):
 	status="subscribing") 
     self.channel.put()
 
+  def tearDown(self):
+    self.channel.delete()
+
+  def verify(self, 
+             key=None, 
+	     topic=None, 
+	     challenge="venus",
+             mode="subscribe", 
+	     token=HUB["token"]):
+    """Simulate a push verify request
+    """
+    if not key: key = str(self.channel.key())
+    if not topic: topic = self.channel.topic
+    app = TestApp(self.application)
+    response = app.get(WORKER['subbub'] 
+	+ key
+	+ "?hub.mode=" + mode
+	+ "&hub.topic=" + topic
+	+ "&hub.challenge=" + challenge
+	+ "&hub.verify_token=" + token,
+	expect_errors=True)
+    return response
+
   def testAllParamsOK(self):
     """Expect 200 OK if all params match.
 
     Expect hub.challenge.
     """
-    app = TestApp(self.application)
     challenge = "venus"
-    response = app.get(WORKER['subbub'] 
-	+ str(self.channel.key())
-	+ "?hub.mode=subscribe"
-	+ "&hub.topic=" + self.channel.topic
-	+ "&hub.challenge=" + challenge
-	+ "&hub.verify_token=" + HUB['token'])
+    response = self.verify()
     self.assertEqual("200 OK", response.status)
     self.assertEqual(challenge, response.body)
     # Refetch the instance from the datastore, so its attributes
@@ -50,15 +67,8 @@ class TestVerification(unittest.TestCase):
     The (un)subscribe request must be initiated by someone else, or the
     token is broken. Hub will not retry.
     """
-    app = TestApp(self.application)
     challenge = "venus"
-    response = app.get(WORKER['subbub']
-	+ str(self.channel.key())
-	+ "?hub.mode=subscribe"
-	+ "&hub.topic=" + self.channel.topic
-	+ "&hub.challenge=" + challenge
-	+ "&hub.verify_token=" + "brokentoken",
-	expect_errors=True)
+    response = self.verify(token="brokentoken")
     self.assertEqual("404 Not Found", response.status)
 
   def testCallbackNotMatch(self):
@@ -67,15 +77,8 @@ class TestVerification(unittest.TestCase):
     The key associated with callback url could not be found in the
     datastore. Hub will not retry.
     """
-    app = TestApp(self.application)
     challenge = "venus"
-    response = app.get(WORKER['subbub']
-	+ "randomkeystring"
-	+ "?hub.mode=subscribe"
-	+ "&hub.topic=" + self.channel.topic
-	+ "&hub.challenge=" + challenge
-	+ "&hub.verify_token=" + HUB['token'],
-	expect_errors=True)
+    response = self.verify(key="randomekeystring")
     self.assertEqual("404 Not Found", response.status)
 
   def testTopicNotMatch(self):
@@ -84,17 +87,7 @@ class TestVerification(unittest.TestCase):
     The topic does not match with the record in datastore. Hub will
     not retry.
     """
-    app = TestApp(self.application)
     challenge = "venus"
-    response = app.get(WORKER['subbub']
-	+ str(self.channel.key())
-	+ "?hub.mode=subscribe"
-	+ "&hub.topic=" + "http://random.dev/atom"
-	+ "&hub.challenge=" + challenge
-	+ "&hub.verify_token=" + HUB['token'],
-	expect_errors=True)
+    response = self.verify(topic="http://random.dev/atom")
     self.assertEqual("404 Not Found", response.status)
 
-
-  def tearDown(self):
-    self.channel.delete()
