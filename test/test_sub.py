@@ -177,7 +177,12 @@ class TestNotification(unittest.TestCase):
     """HTTP POST notification
     """
     app = TestApp(self.application)
-    ct = "application/rss+xml" if type == "rss" else "application/atom+xml"
+    if type == "rss":
+      ct = "application/rss+xml" 
+    if type == "atom":
+      ct = "application/atom+xml"
+    else:
+      ct = type
     response = app.post(WORKER["subbub"] + key,
              params=body,
 	     content_type=ct,
@@ -217,3 +222,10 @@ class TestNotification(unittest.TestCase):
     """
     response = self.notify(str(self.channel.key()), "atom", "")
     self.assertEqual("204 No Content", response.status)
+
+  def testBadContentType(self):
+    """Expect 204 No Content if notify content type not match
+    """
+    response = self.notify(str(self.channel.key()),
+	"application/x-www-form-urlencoded",
+	self.atom)

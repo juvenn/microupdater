@@ -91,8 +91,7 @@ class PushCallback(webapp.RequestHandler):
     type = self.request.headers["Content-Type"]
 
     # Content-Type not match, respond fast
-    if not (type == "application/atom+xml" or
-	    type == "application/rss+xml"):
+    if type not in ["application/atom+xml","application/rss+xml"]:
       self.error(501)
       return
 
