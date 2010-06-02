@@ -179,7 +179,7 @@ class TestNotification(unittest.TestCase):
     app = TestApp(self.application)
     if type == "rss":
       ct = "application/rss+xml" 
-    if type == "atom":
+    elif type == "atom":
       ct = "application/atom+xml"
     else:
       ct = type
