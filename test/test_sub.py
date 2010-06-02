@@ -230,3 +230,9 @@ class TestNotification(unittest.TestCase):
 	"application/x-www-form-urlencoded",
 	self.atom)
     self.assertEqual("204 No Content", response.status)
+
+  def testMissingContentType(self):
+    """Expect 204 No Content if notify content type missing
+    """
+    response = self.notify(str(self.channel.key()), "", self.atom)
+    self.assertEqual("204 No Content", response.status)
