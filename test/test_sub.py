@@ -236,3 +236,26 @@ class TestParseWorker(unittest.TestCase):
       entry = channel.entry_set.filter("uid =", e.id).get()
       self.assertEqual(e.title, entry.title)
       self.assertEqual(e.id, entry.uid)
+
+  def testParseRecurrentAtom(self):
+    """Override entity when an entry being parsed more than once
+
+    The entry existed in the datastore should be updated, instead of
+    inserted. We simply assert the counts of the entries not changed.
+    """
+    app = TestApp(self.application)
+    atom = open("test/atom.xml", "r").read()
+    doc = feedparser.parse(atom)
+    key = self.channel.key()
+    response = app.post(WORKER["parser"] + str(key),
+             params=atom,
+	     content_type="application/atom+xml")
+    oldcount = Channel.get(key).entry_set.count()
+
+    # Rework the parsing task
+    response = app.post(WORKER["parser"] + str(key),
+             params=atom,
+	     content_type="application/atom+xml")
+    newcount = Channel.get(key).entry_set.count()
+
+    self.assertEqual(oldcount, newcount)
