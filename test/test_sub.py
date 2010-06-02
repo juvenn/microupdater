@@ -256,6 +256,7 @@ class TestParseWorker(unittest.TestCase):
     pass
 
   def testParseAtom(self):
+    """Datastore should have updated if everything goes well"""
     app = TestApp(self.application)
     atom = open("test/atom.xml", "r").read()
     doc = feedparser.parse(atom)
