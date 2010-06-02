@@ -113,7 +113,7 @@ class TestNotification(unittest.TestCase):
 
   PubSubHubbub 0.3:
   202 - Notification accepted, added to taskqueue
-  204 - Payload not valid atom/rss
+  204 - Ignored, Payload not valid
   2xx - General notify success
   xxx - Fail, please retry the notification later
 
@@ -185,19 +185,21 @@ class TestNotification(unittest.TestCase):
     return response
 
   def testNotifyAtomAsAtom(self):
-    """Success if notify atom as atom
+    """Expect 202 Accepted if notify atom as atom
     """
     response = self.notify(str(self.channel.key()), "atom", self.atom)
     self.assertEqual("202 Accepted", response.status)
 
   def testNotifyAtomAsRss(self):
-    """Success regardless of content-type not match.
+    """Expect 202 Accepted if notify atom as rss
+
+    Success regardless of content-type not match.
     """
     response = self.notify(str(self.channel.key()), "rss", self.atom)
     self.assertEqual("202 Accepted", response.status)
 
   def testNotifyKeyBroken(self):
-    """Expect 204 No Content if the associated key broken
+    """Expect 204 No Content if the notify key broken
 
     We do not support aggregated atom feeds for now.
     """
@@ -205,13 +207,13 @@ class TestNotification(unittest.TestCase):
     self.assertEqual("204 No Content", response.status)
 
   def testNotifyKeyMissing(self):
-    """Expect 204 No Content if the key missing
+    """Expect 204 No Content if the notify key missing
     """
     response = self.notify("", "atom", self.atom)
     self.assertEqual("204 No Content", response.status)
 
   def testNotifyEmptyPayload(self):
-    """Expect 204 No Content if the payload empty
+    """Expect 204 No Content if the notify payload empty
     """
     response = self.notify(str(self.channel.key()), "atom", "")
     self.assertEqual("204 No Content", response.status)
