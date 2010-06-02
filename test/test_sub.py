@@ -114,6 +114,12 @@ class TestNotification(unittest.TestCase):
   PubSubHubbub 0.3:
   2xx - Notification success
   xxx - Fail, please retry the notification later
+
+  "Subscribers SHOULD respond to notifications as quickly as possible;
+  their success response code SHOULD only indicate receipt of the
+  message, not acknowledgment that it was successfully processed by the
+  subscriber." 
+    -- Section 7.3, PubSubHubbub Core 0.3
   """
   def setUp(self):
     self.application = webapp.WSGIApplication([
