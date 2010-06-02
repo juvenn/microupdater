@@ -94,9 +94,9 @@ class PushCallback(webapp.RequestHandler):
       taskqueue.Task(self.request.body.decode("utf-8"),
 	  url=WORKER['parser'] + key,
 	  headers={"Content-Type": type}).add(queue_name="parse")
-      self.response.set_status(200)
       logging.info("Upon notifications: %s from %s" % 
 	  (self.request.url, self.request.remote_addr))
+      self.response.set_status(202)
     else:
       # Not implemented
       self.error(501)
