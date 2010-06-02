@@ -132,44 +132,7 @@ class TestNotification(unittest.TestCase):
 	topic="http://dummychannel.dev/atom",
 	status="subscribed") 
     self.channel.put()
-    self.atom = """
-<?xml version="1.0"?>
-<atom:feed>
-  <link rel="hub" href="http://myhub.example.com/endpoint" />
-  <link rel="self" href="http://publisher.example.com/happycats.xml" />
-  <updated>2008-08-11T02:15:01Z</updated>
-  <entry>
-    <title>Heathcliff</title>
-    <link href="http://publisher.example.com/happycat25.xml" />
-    <id>http://publisher.example.com/happycat25.xml</id>
-    <updated>2008-08-11T02:15:01Z</updated>
-    <content>
-      What a happy cat. Full content goes here.
-    </content>
-  </entry>
-  <entry >
-    <title>Heathcliff</title>
-    <link href="http://publisher.example.com/happycat25.xml" />
-    <id>http://publisher.example.com/happycat25.xml</id>
-    <updated>2008-08-11T02:15:01Z</updated>
-    <summary>
-      What a happy cat!
-    </summary>
-  </entry>
-  <entry>
-    <title>Garfield</title>
-    <link rel="alternate" href="http://publisher.example.com/happycat24.xml" />
-    <id>http://publisher.example.com/happycat25.xml</id>
-    <updated>2008-08-11T02:15:01Z</updated>
-  </entry>
-  <entry>
-    <title>Nermal</title>
-    <link rel="alternate" href="http://publisher.example.com/happycat23s.xml" />
-    <id>http://publisher.example.com/happycat25.xml</id>
-    <updated>2008-07-10T12:28:13Z</updated>
-  </entry>
-</atom:feed>
-    """
+    self.atom = open("test/atom.xml", "r").read()
 
   def tearDown(self):
     self.channel.delete()
