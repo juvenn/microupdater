@@ -112,7 +112,9 @@ class TestNotification(unittest.TestCase):
   """Notification Test Cases
 
   PubSubHubbub 0.3:
-  2xx - Notification success
+  202 - Notification accepted, added to taskqueue
+  204 - Payload not valid atom/rss
+  2xx - General notify success
   xxx - Fail, please retry the notification later
 
   "Subscribers SHOULD respond to notifications as quickly as possible;
@@ -186,10 +188,10 @@ class TestNotification(unittest.TestCase):
     """Success if notify atom as atom
     """
     response = self.notify(str(self.channel.key()), "atom", self.atom)
-    self.assertEqual("200 OK", response.status)
+    self.assertEqual("202 Accepted", response.status)
 
   def testNotifyAtomAsRss(self):
     """Success regardless of content-type not match.
     """
     response = self.notify(str(self.channel.key()), "rss", self.atom)
-    self.assertEqual("200 OK", response.status)
+    self.assertEqual("202 Accepted", response.status)
