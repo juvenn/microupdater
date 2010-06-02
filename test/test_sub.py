@@ -203,3 +203,9 @@ class TestNotification(unittest.TestCase):
     """
     response = self.notify("brokenkeystring", "atom", self.atom)
     self.assertEqual("204 No Content", response.status)
+
+  def testNotifyMissingKey(self):
+    """Expect 204 No Content if the key missing
+    """
+    response = self.notify("", "atom", self.atom)
+    self.assertEqual("204 No Content", response.status)
