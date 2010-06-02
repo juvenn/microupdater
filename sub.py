@@ -106,15 +106,17 @@ class PushCallback(webapp.RequestHandler):
       self.response.set_status(204)
     except:
       # Datastore Error, please retry notification
-      self.response.set_status(500)
+      self.error(500)
     else:
-      if not ch:
-	logging.error("Key Not Found at notification: %s" % 
-	    self.request.url)
+      body = self.request.body.decode("utf-8")
+      if not (ch and body):
+	if not ch: 
+	  logging.error("Key Not Found at notification: %s" % 
+	    self.request.url) 
 	self.response.headers.__delitem__("Content-Type")
 	self.response.set_status(204)
       else:
-	taskqueue.Task(self.request.body.decode("utf-8"),
+	taskqueue.Task(body,
 	    url=WORKER['parser'] + key,
 	    headers={"Content-Type": type}).add(queue_name="parse")
 	logging.info("Upon notifications: %s from %s" % 
