@@ -91,6 +91,21 @@ class PushCallback(webapp.RequestHandler):
     type = self.request.headers["Content-Type"]
     if type == "application/atom+xml" or type == "application/rss+xml":
       key = self.request.path[len(WORKER['subbub']):]
+      try:
+	ch = Channel.get(key)
+      except:
+	logging.error("Broken Key at notification: %s" % 
+	    self.request.url)
+	self.response.headers.__delitem__("Content-Type")
+	self.response.set_status(204)
+	return
+      else:
+	if not ch:
+	  logging.error("Key Not Found at notification: %s" % 
+	      self.request.url)
+	  self.response.headers.__delitem__("Content-Type")
+	  self.response.set_status(204)
+	  return
       taskqueue.Task(self.request.body.decode("utf-8"),
 	  url=WORKER['parser'] + key,
 	  headers={"Content-Type": type}).add(queue_name="parse")
