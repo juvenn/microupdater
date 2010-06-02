@@ -89,32 +89,37 @@ class PushCallback(webapp.RequestHandler):
     Atom/rss feed is queued to `ParseWorker` for later parsing
     """
     type = self.request.headers["Content-Type"]
-    if type == "application/atom+xml" or type == "application/rss+xml":
+
+    # Content-Type not match, respond fast
+    if not (type == "application/atom+xml" or
+	    type == "application/rss+xml"):
+      self.error(501)
+      return
+
+    try:
       key = self.request.path[len(WORKER['subbub']):]
-      try:
-	ch = Channel.get(key)
-      except:
-	logging.error("Broken Key at notification: %s" % 
+      ch = Channel.get(key)
+    except (db.KindError, db.BadKeyError):
+      logging.error("Broken Key at notification: %s" % 
+	  self.request.url)
+      self.response.headers.__delitem__("Content-Type")
+      self.response.set_status(204)
+    except:
+      # Datastore Error, please retry notification
+      self.response.set_status(500)
+    else:
+      if not ch:
+	logging.error("Key Not Found at notification: %s" % 
 	    self.request.url)
 	self.response.headers.__delitem__("Content-Type")
 	self.response.set_status(204)
-	return
       else:
-	if not ch:
-	  logging.error("Key Not Found at notification: %s" % 
-	      self.request.url)
-	  self.response.headers.__delitem__("Content-Type")
-	  self.response.set_status(204)
-	  return
-      taskqueue.Task(self.request.body.decode("utf-8"),
-	  url=WORKER['parser'] + key,
-	  headers={"Content-Type": type}).add(queue_name="parse")
-      logging.info("Upon notifications: %s from %s" % 
-	  (self.request.url, self.request.remote_addr))
-      self.response.set_status(202)
-    else:
-      # Not implemented
-      self.error(501)
+	taskqueue.Task(self.request.body.decode("utf-8"),
+	    url=WORKER['parser'] + key,
+	    headers={"Content-Type": type}).add(queue_name="parse")
+	logging.info("Upon notifications: %s from %s" % 
+	    (self.request.url, self.request.remote_addr))
+	self.response.set_status(202)
 
 
 # Queued tastks of parsing incoming notifications
