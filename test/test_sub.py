@@ -229,3 +229,4 @@ class TestNotification(unittest.TestCase):
     response = self.notify(str(self.channel.key()),
 	"application/x-www-form-urlencoded",
 	self.atom)
+    self.assertEqual("204 No Content", response.status)
