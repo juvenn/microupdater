@@ -1,9 +1,10 @@
 import unittest
+import feedparser
 from webtest import TestApp
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from model import WORKER, HUB, Channel
-from sub import PushCallback
+from sub import PushCallback, ParseWorker
 
 
 class TestVerification(unittest.TestCase):
@@ -236,3 +237,38 @@ class TestNotification(unittest.TestCase):
     """
     response = self.notify(str(self.channel.key()), "", self.atom)
     self.assertEqual("204 No Content", response.status)
+
+
+class TestParseWorker(unittest.TestCase):
+  """Parsing task handler test cases
+  """
+
+  def setUp(self):
+    self.application = webapp.WSGIApplication([
+      (WORKER['parser'] + ".*",ParseWorker)
+      ],debug=True)
+    self.channel = Channel(title="Test Channel",
+	topic="http://monica-ping.tumblr.com/rss",
+	status="subscribed") 
+    self.channel.put()
+
+  def tearDown(self):
+    pass
+
+  def testParseAtom(self):
+    app = TestApp(self.application)
+    atom = open("test/atom.xml", "r").read()
+    doc = feedparser.parse(atom)
+    response = app.post(WORKER["parser"] + str(self.channel.key()),
+             params=atom,
+	     content_type="application/atom+xml")
+    channel = Channel.get(self.channel.key())
+
+    self.assertEqual(doc.feed.title, channel.title)
+    self.assertEqual(doc.feed.id, channel.uid)
+    self.assertEqual(len(doc.entries), channel.entry_set.count())
+
+    for e in doc.entries:
+      entry = channel.entry_set.filter("uid =", e.id).get()
+      self.assertEqual(e.title, entry.title)
+      self.assertEqual(e.id, entry.uid)
