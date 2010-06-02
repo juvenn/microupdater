@@ -196,7 +196,7 @@ class TestNotification(unittest.TestCase):
     response = self.notify(str(self.channel.key()), "rss", self.atom)
     self.assertEqual("202 Accepted", response.status)
 
-  def testNotifyBrokenKey(self):
+  def testNotifyKeyBroken(self):
     """Expect 204 No Content if the associated key broken
 
     We do not support aggregated atom feeds for now.
@@ -204,7 +204,7 @@ class TestNotification(unittest.TestCase):
     response = self.notify("brokenkeystring", "atom", self.atom)
     self.assertEqual("204 No Content", response.status)
 
-  def testNotifyMissingKey(self):
+  def testNotifyKeyMissing(self):
     """Expect 204 No Content if the key missing
     """
     response = self.notify("", "atom", self.atom)
