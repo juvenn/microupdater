@@ -209,3 +209,9 @@ class TestNotification(unittest.TestCase):
     """
     response = self.notify("", "atom", self.atom)
     self.assertEqual("204 No Content", response.status)
+
+  def testNotifyEmptyPayload(self):
+    """Expect 204 No Content if the payload empty
+    """
+    response = self.notify(str(self.channel.key()), "atom", "")
+    self.assertEqual("204 No Content", response.status)
