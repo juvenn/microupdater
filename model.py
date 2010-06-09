@@ -26,7 +26,7 @@ HUB = {
     "auth": ["USER", "PASSWORD"]
     }
 
-class Channel(db.Model):
+class Channel(db.Expando):
   title = db.StringProperty()
   # coincide hub.topic, should be a valid feed
   # e.g. topic.com/topic/atom.xml
@@ -124,7 +124,7 @@ class Channel(db.Model):
 
 
 
-class Entry(db.Model):
+class Entry(db.Expando):
   author = db.StringProperty()
   title = db.StringProperty(required=True)
   # Entry's unique identifier 
